@@ -1,0 +1,22 @@
+:root {
+  --cacao: #3e2723;
+  --madera: #6d4c41;
+  --oro: #b08968;
+  --crema-clara: #e6ccb2;
+  --crema: #f5e8c7;
+  --rosa: #e8c4c4;
+  --oliva: #b5cda3;
+  --blanco: #ffffff;
+}
+.bg-cacao { background-color: var(--cacao) !important; }
+.bg-madera { background-color: var(--madera) !important; }
+.bg-crema { background-color: var(--crema) !important; }
+.bg-crema-clara { background-color: var(--crema-clara) !important; }
+.bg-rosa { background-color: var(--rosa) !important; }
+.bg-oliva { background-color: var(--oliva) !important; }
+.bg-oro { background-color: var(--oro) !important; }
+.text-cacao { color: var(--cacao) !important; }
+.text-madera { color: var(--madera) !important; }
+.text-oro { color: var(--oro) !important; }
+.text-rosa { color: var(--rosa) !important; }
+.text-oliva { color: var(--oliva) !important; }

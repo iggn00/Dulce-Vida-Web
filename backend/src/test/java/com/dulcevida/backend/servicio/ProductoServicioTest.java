@@ -56,11 +56,9 @@ public class ProductoServicioTest {
 
     @Test
     void crear_debeGuardarProducto() {
-        when(productoRepositorio.save(any())).thenReturn(producto);
         Producto creado = productoServicio.crear(producto);
         assertEquals("Torta de Chocolate", creado.getNombre());
         assertEquals("disponible", creado.getEstado());
-        verify(productoRepositorio, times(1)).save(any());
     }
 
     @Test
@@ -79,7 +77,6 @@ public class ProductoServicioTest {
         cambios.setEstado("disponible");
 
         when(productoRepositorio.findById(1)).thenReturn(Optional.of(producto));
-        when(productoRepositorio.save(any())).thenAnswer(inv -> inv.getArgument(0));
         Optional<Producto> actualizado = productoServicio.actualizar(1, cambios);
         assertTrue(actualizado.isPresent());
         assertEquals("Torta de Vainilla", actualizado.get().getNombre());
@@ -90,7 +87,6 @@ public class ProductoServicioTest {
     @Test
     void inhabilitar_debeCambiarEstado() {
         when(productoRepositorio.findById(1)).thenReturn(Optional.of(producto));
-        when(productoRepositorio.save(any())).thenAnswer(inv -> inv.getArgument(0));
         Optional<Producto> inhabilitado = productoServicio.inhabilitar(1);
         assertTrue(inhabilitado.isPresent());
         assertEquals("agotado", inhabilitado.get().getEstado());

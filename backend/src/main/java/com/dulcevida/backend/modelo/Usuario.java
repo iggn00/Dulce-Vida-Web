@@ -5,12 +5,16 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "Usuario")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Usuario {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
@@ -28,29 +32,9 @@ public class Usuario {
 
     @NotBlank
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
-    private String password; // Se almacena cifrada (BCrypt)
+    private String password; // Almacenada temporalmente en texto plano (sin cifrar)
 
     @NotBlank
     @Pattern(regexp = "ADMINISTRADOR|EMPLEADO|CLIENTE", message = "El rol debe ser ADMINISTRADOR, EMPLEADO o CLIENTE")
-    private String rol; // ADMINISTRADOR, EMPLEADO, etc.
-
-
-
-    public Integer getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
-
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public String getRol() { return rol; }
-    public void setRol(String rol) { this.rol = rol; }
-
-    // El campo 'estado' se elimina para ajustar al esquema actualizado
-
+    private String rol; 
 }

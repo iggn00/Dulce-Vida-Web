@@ -1,7 +1,4 @@
--- -----------------------------------------------------
--- Tablas `Categorias` y `Productos`
--- -----------------------------------------------------
-USE `DulceVidaDB`;
+USE `dulcevidadb`;
 
 CREATE TABLE IF NOT EXISTS `Categorias` (
   `id_categoria` INT NOT NULL AUTO_INCREMENT,

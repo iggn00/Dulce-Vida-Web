@@ -5,6 +5,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 
 import java.nio.file.Path;
 
@@ -19,5 +20,11 @@ public class RecursosEstaticosConfig implements WebMvcConfigurer {
         String ruta = Path.of(directorioUploads).toAbsolutePath().toUri().toString();
         registry.addResourceHandler("/" + directorioUploads + "/**")
                 .addResourceLocations(ruta);
+    }
+
+    @Override
+    public void addViewControllers(@NonNull ViewControllerRegistry registry) {
+        // Fallback SPA: cualquier ruta que no sea API ni asset (sin punto) va a index.html
+        registry.addViewController("/{path:[^\\.]*}").setViewName("forward:/index.html");
     }
 }

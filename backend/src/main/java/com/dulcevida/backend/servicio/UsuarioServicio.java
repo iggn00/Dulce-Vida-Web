@@ -4,10 +4,10 @@ import com.dulcevida.backend.modelo.Usuario;
 import com.dulcevida.backend.repositorio.UsuarioRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -16,15 +16,12 @@ public class UsuarioServicio {
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
 
-    @Autowired
-    private PasswordEncoder encriptador;
-
     public List<Usuario> listar() {
         return usuarioRepositorio.findAll();
     }
 
     public Optional<Usuario> buscarPorId(Integer id) {
-        return usuarioRepositorio.findById(id);
+        return usuarioRepositorio.findById(Objects.requireNonNull(id));
     }
 
     public Optional<Usuario> buscarPorEmail(String email) {
@@ -40,8 +37,10 @@ public class UsuarioServicio {
         if (usuarioRepositorio.findByEmail(usuario.getEmail()).isPresent()) {
             throw new DuplicateKeyException("El email ya está registrado");
         }
-        usuario.setPassword(encriptador.encode(usuario.getPassword()));
-        return usuarioRepositorio.save(usuario);
+        // Almacenar la contraseña en texto plano (temporalmente, sin cifrar)
+        usuario.setPassword(usuario.getPassword());
+        usuarioRepositorio.save(usuario);
+        return usuario;
     }
 
     public Optional<Usuario> actualizar(Integer id, Usuario cambios) {
@@ -52,14 +51,16 @@ public class UsuarioServicio {
                 throw new DuplicateKeyException("El email ya está registrado por otro usuario");
             }
         }
-        return usuarioRepositorio.findById(id).map(u -> {
+        return usuarioRepositorio.findById(Objects.requireNonNull(id)).map(u -> {
             u.setNombre(cambios.getNombre());
             u.setEmail(cambios.getEmail());
             if (cambios.getPassword() != null && !cambios.getPassword().isBlank()) {
-                u.setPassword(encriptador.encode(cambios.getPassword()));
+                // Actualizar en texto plano (sin cifrar)
+                u.setPassword(cambios.getPassword());
             }
             u.setRol(cambios.getRol());
-            return usuarioRepositorio.save(u);
+            usuarioRepositorio.save(u);
+            return u;
         });
     }
 

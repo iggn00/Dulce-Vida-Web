@@ -1,7 +1,4 @@
--- -----------------------------------------------------
--- Tablas `Clientes`, `Pedidos` y `Detalle_Pedido`
--- -----------------------------------------------------
-USE `DulceVidaDB`;
+USE `dulcevidadb`;
 
 CREATE TABLE IF NOT EXISTS `Clientes` (
   `id_cliente` INT NOT NULL AUTO_INCREMENT,

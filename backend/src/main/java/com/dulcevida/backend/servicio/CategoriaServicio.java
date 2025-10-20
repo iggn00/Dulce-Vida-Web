@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 @Service
 public class CategoriaServicio {
@@ -19,7 +20,7 @@ public class CategoriaServicio {
     }
 
     public Optional<Categoria> buscarPorId(Integer id) {
-        return categoriaRepositorio.findById(id);
+        return categoriaRepositorio.findById(Objects.requireNonNull(id));
     }
 
     public Optional<Categoria> buscarPorNombre(String nombre) {

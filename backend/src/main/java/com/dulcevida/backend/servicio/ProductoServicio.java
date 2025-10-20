@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -19,7 +20,7 @@ public class ProductoServicio {
     }
 
     public Optional<Producto> buscarPorId(Integer id) {
-        return productoRepositorio.findById(id);
+        return productoRepositorio.findById(Objects.requireNonNull(id));
     }
 
     public List<Producto> buscarPorNombre(String texto) {
@@ -40,11 +41,12 @@ public class ProductoServicio {
 
     public Producto crear(Producto producto) {
         producto.setEstado(producto.getEstado() == null ? "disponible" : producto.getEstado());
-        return productoRepositorio.save(producto);
+        productoRepositorio.save(producto);
+        return producto;
     }
 
     public Optional<Producto> actualizar(Integer id, Producto cambios) {
-        return productoRepositorio.findById(id).map(p -> {
+        return productoRepositorio.findById(Objects.requireNonNull(id)).map(p -> {
             p.setNombre(cambios.getNombre());
             p.setDescripcion(cambios.getDescripcion());
             p.setPrecio(cambios.getPrecio());
@@ -52,14 +54,16 @@ public class ProductoServicio {
             p.setCategoria(cambios.getCategoria());
             p.setImagenUrl(cambios.getImagenUrl());
             p.setEstado(cambios.getEstado());
-            return productoRepositorio.save(p);
+            productoRepositorio.save(p);
+            return p;
         });
     }
 
     public Optional<Producto> inhabilitar(Integer id) {
-        return productoRepositorio.findById(id).map(p -> {
+        return productoRepositorio.findById(Objects.requireNonNull(id)).map(p -> {
             p.setEstado("agotado");
-            return productoRepositorio.save(p);
+            productoRepositorio.save(p);
+            return p;
         });
     }
 }

@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +26,8 @@ import java.util.UUID;
 @RequestMapping("/api/productos")
 @Validated
 public class ProductoControlador {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductoControlador.class);
 
     @Autowired
     private ProductoServicio productoServicio;
@@ -33,7 +37,9 @@ public class ProductoControlador {
 
     @GetMapping
     public List<Producto> listar() {
-        return productoServicio.listar();
+        List<Producto> productos = productoServicio.listar();
+        log.info("Productos devueltos: {}", productos);
+        return productos;
     }
 
     @GetMapping("/{id}")
@@ -96,7 +102,8 @@ public class ProductoControlador {
             Path rutaDir = Path.of(directorioUploads).toAbsolutePath().normalize();
             Files.createDirectories(rutaDir);
             // Nombre único
-            String nombreOriginal = StringUtils.cleanPath(Optional.ofNullable(archivo.getOriginalFilename()).orElse("unnamed"));
+            String original = archivo.getOriginalFilename();
+            String nombreOriginal = StringUtils.cleanPath(original != null ? original : "unnamed");
             String nombreFinal = UUID.randomUUID() + "_" + nombreOriginal;
             Path rutaArchivo = rutaDir.resolve(nombreFinal);
             Files.copy(archivo.getInputStream(), rutaArchivo);

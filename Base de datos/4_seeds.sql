@@ -2,9 +2,9 @@
 -- Datos de prueba / seeds
 -- Ejecutar después de crear las tablas
 -- -----------------------------------------------------
-USE `DulceVidaDB`;
+USE `dulcevidadb`;
 
--- Usuario administrador (recuerda encriptar la contraseña en tu aplicación)
+-- Usuario administrador (contraseña en texto plano, solo para desarrollo)
 INSERT INTO `Usuario` (`nombre`, `email`, `password`) VALUES ('Dueña Pastelería', 'admin@dulcevida.cl', 'admin123');
 
 -- Categorías de productos

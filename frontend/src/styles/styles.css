@@ -1,4 +1,10 @@
 @import url('./variables.css');
+@import url('./components/buttons.css');
+@import url('./components/navbar.css');
+@import url('./components/footer.css');
+@import url('./components/products.css');
+@import url('./components/forms.css');
+@import url('./components/admin.css');
 /* Estilos base adaptados del proyecto original */
 :root {
   --bs-body-bg: var(--crema);

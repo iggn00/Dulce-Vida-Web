@@ -7,6 +7,7 @@ export default function ProductosPage() {
   const [categorias, setCategorias] = useState([])
   const [categoriaId, setCategoriaId] = useState('')
   const [form, setForm] = useState({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '' })
+  const [editId, setEditId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -27,7 +28,15 @@ export default function ProductosPage() {
     try {
       const [cats, prods] = await Promise.all([
         api.get('/categorias'),
-        (q || categoriaId) ? api.get(`/productos/buscar${q ? `?q=${encodeURIComponent(q)}` : ''}${!q && categoriaId ? `?idCategoria=${categoriaId}` : (q && categoriaId ? `&idCategoria=${categoriaId}` : '')}`) : api.get('/productos')
+        (async () => {
+          if (q || categoriaId) {
+            const params = new URLSearchParams()
+            if (q) params.set('q', q)
+            if (categoriaId) params.set('idCategoria', categoriaId)
+            return api.get(`/productos/buscar?${params.toString()}`)
+          }
+          return api.get('/productos')
+        })()
       ])
       setCategorias(cats.data)
       setProductos(prods.data)
@@ -52,18 +61,24 @@ export default function ProductosPage() {
     }
     try {
       const payload = { ...form, categoria: { idCategoria: Number(form.idCategoria) } }
-      await api.post('/productos', payload)
+      if (editId) {
+        await api.put(`/productos/${editId}`, payload)
+      } else {
+        await api.post('/productos', payload)
+      }
       setForm({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: categorias[0]?.idCategoria ? String(categorias[0].idCategoria) : '' })
+      setEditId(null)
       cargar()
     } catch (e) {
       const resp = e?.response?.data
-      setError(resp?.errores ? resp.errores.join(', ') : (resp?.mensaje || 'Error creando producto'))
+      setError(resp?.errores ? resp.errores.join(', ') : (resp?.mensaje || (editId ? 'Error actualizando producto' : 'Error creando producto')))
     } finally {
       setLoading(false)
     }
   }
 
   const inhabilitar = async (id) => {
+    if (!confirm('¿Seguro que deseas inhabilitar este producto?')) return
     setLoading(true)
     try {
       await api.delete(`/productos/${id}`)
@@ -114,7 +129,10 @@ export default function ProductosPage() {
 
       <div className="grid">
         <div className="card">
-          <h3>Crear producto</h3>
+          <div className="d-flex justify-content-between align-items-center">
+            <h3>{editId ? 'Editar producto' : 'Crear producto'}</h3>
+            {editId && <button className="btn" type="button" onClick={()=>{ setEditId(null); setForm({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '' }) }}>Cancelar edición</button>}
+          </div>
           <form onSubmit={crear} className="form-grid">
             <label>Nombre<input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required /></label>
             <label>Descripción<textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} required /></label>
@@ -126,7 +144,7 @@ export default function ProductosPage() {
                 <option key={c.idCategoria} value={c.idCategoria}>{c.nombre}</option>
               ))}
             </select></label>
-            <button className="btn" type="submit" disabled={loading}>Crear</button>
+            <button className="btn" type="submit" disabled={loading}>{editId ? 'Guardar cambios' : 'Crear'}</button>
             {error && <div className="error">{error}</div>}
           </form>
         </div>
@@ -134,7 +152,8 @@ export default function ProductosPage() {
         <div className="card">
           <h3>Listado</h3>
           {loading ? <p>Cargando...</p> : (
-            <table className="table">
+            <div className="table-responsive">
+            <table className="table align-middle">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -143,7 +162,7 @@ export default function ProductosPage() {
                   <th>Precio</th>
                   <th>Stock</th>
                   <th>Imagen</th>
-                  <th></th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -161,13 +180,24 @@ export default function ProductosPage() {
                         <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && subirImagen(p.idProducto, e.target.files[0])} />
                       )}
                     </td>
-                    <td>
+                    <td className="d-flex gap-2">
+                      <button className="btn" onClick={() => {
+                        setEditId(p.idProducto)
+                        setForm({
+                          nombre: p.nombre || '',
+                          descripcion: p.descripcion || '',
+                          precio: Number(p.precio) || 0,
+                          stock: Number(p.stock) || 0,
+                          idCategoria: p.categoria?.idCategoria ? String(p.categoria.idCategoria) : ''
+                        })
+                      }}>Editar</button>
                       {p.estado === 'disponible' && <button className="btn" onClick={() => inhabilitar(p.idProducto)}>Inhabilitar</button>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

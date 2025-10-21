@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login, user } = useAuth()
   const nav = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -12,7 +12,10 @@ export default function LoginPage() {
   async function onSubmit(e) {
     e.preventDefault()
     const ok = await login(email, password)
-    if (ok) nav('/admin/dashboard')
+    if (ok) {
+      if ((user?.rol || JSON.parse(localStorage.getItem('dv_auth'))?.rol) === 'ADMINISTRADOR') nav('/admin/dashboard')
+      else nav('/')
+    }
     else setError('Credenciales inválidas')
   }
 

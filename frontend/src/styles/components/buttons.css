@@ -1,0 +1,37 @@
+.btn-dorado {
+  --btn-bg: var(--oro);
+  --btn-border: var(--oro);
+  background-color: var(--btn-bg);
+  border-color: var(--btn-border);
+  color: #fff;
+}
+.btn-dorado:hover,
+.btn-dorado:focus {
+  background-color: #9f7354;
+  border-color: #9f7354;
+  color: #fff;
+}
+.btn-dorado:active {
+  background-color: #8f664a;
+  border-color: #8f664a;
+  color: #fff;
+}
+.btn-cafe {
+  background-color: var(--blanco);
+  color: var(--cacao);
+  border: 1px solid var(--cacao);
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-cafe:hover,
+.btn-cafe:focus {
+  background-color: var(--oro);
+  color: #fff;
+  border-color: var(--oro);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.06);
+}
+.btn-cafe:active {
+  background-color: #8f664a;
+  border-color: #8f664a;
+  color: #fff;
+}

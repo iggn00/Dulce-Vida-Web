@@ -30,8 +30,12 @@ export default function Footer() {
               <div className="small mb-3">+56 9 1234 5678</div>
               <div className="fw-semibold titulo-pie mb-2">Síguenos</div>
               <div className="d-flex align-items-center gap-3 mb-3">
-                <a className="social-pie" href="#" aria-label="Instagram">📷</a>
-                <a className="social-pie" href="#" aria-label="TikTok">🎵</a>
+                <a className="social-pie" href="#" aria-label="Instagram">
+                  <img src="/img/misc/instagram.png" alt="Instagram" height="22" />
+                </a>
+                <a className="social-pie" href="#" aria-label="TikTok">
+                  <img src="/img/misc/tiktok.png" alt="TikTok" height="22" />
+                </a>
               </div>
               <div className="fw-semibold titulo-pie mb-2">Newsletter</div>
               <form className="input-group input-group-sm" aria-label="Suscripción a newsletter" onSubmit={(e) => e.preventDefault()}>

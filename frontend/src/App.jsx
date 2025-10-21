@@ -6,9 +6,17 @@ import ProductosPage from './pages/ProductosPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { CartProvider } from './context/CartContext.jsx'
 import DashboardPage from './pages/admin/DashboardPage.jsx'
 import UsuariosPage from './pages/admin/UsuariosPage.jsx'
 import AdminProductosPage from './pages/admin/ProductosPage.jsx'
+import AdminContactosPage from './pages/admin/ContactosPage.jsx'
+import AdminLayoutShell from './components/admin/AdminLayout.jsx'
+import HomePage from './pages/HomePage.jsx'
+import ContactoPage from './pages/ContactoPage.jsx'
+import NosotrosPage from './pages/NosotrosPage.jsx'
+import CartPage from './pages/CartPage.jsx'
+import RegisterPage from './pages/RegisterPage.jsx'
 
 function Layout() {
   return (
@@ -22,32 +30,6 @@ function Layout() {
   )
 }
 
-function HomePage() {
-  return (
-    <div>
-      <h1 className="h4 mb-3">Bienvenido a Dulce Vida</h1>
-      <p className="text-muted">Repostería artesanal con ingredientes de calidad.</p>
-    </div>
-  )
-}
-
-function ContactoPage() {
-  return (
-    <div>
-      <h1 className="h4 mb-3">Contacto</h1>
-      <p className="text-muted">Escríbenos a correo@dulcevida.cl</p>
-    </div>
-  )
-}
-
-function NosotrosPage() {
-  return (
-    <div>
-      <h1 className="h4 mb-3">Nosotros</h1>
-      <p className="text-muted">Pasión por el cacao y la repostería.</p>
-    </div>
-  )
-}
 
 function AdminLayout({ title, children }) {
   return (
@@ -63,6 +45,7 @@ function AdminLayout({ title, children }) {
 export default function App() {
   return (
     <AuthProvider>
+      <CartProvider>
       <Routes>
         <Route path="/" element={<Layout />}> 
           <Route index element={<HomePage />} />
@@ -70,14 +53,20 @@ export default function App() {
           <Route path="contacto" element={<ContactoPage />} />
           <Route path="nosotros" element={<NosotrosPage />} />
           <Route path="login" element={<LoginPage />} />
-          <Route path="admin" element={<ProtectedRoute />}> 
-            <Route path="dashboard" element={<AdminLayout title="Dashboard"><DashboardPage /></AdminLayout>} />
-            <Route path="usuarios" element={<AdminLayout title="Usuarios"><UsuariosPage /></AdminLayout>} />
-            <Route path="productos" element={<AdminLayout title="Productos"><AdminProductosPage /></AdminLayout>} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="carrito" element={<CartPage />} />
+          <Route path="admin" element={<ProtectedRoute requiredRoles={["ADMINISTRADOR"]} />}> 
+            <Route element={<AdminLayoutShell title="Panel" />}> 
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="usuarios" element={<UsuariosPage />} />
+              <Route path="productos" element={<AdminProductosPage />} />
+              <Route path="contactos" element={<AdminContactosPage />} />
+            </Route>
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </CartProvider>
     </AuthProvider>
   )
 }

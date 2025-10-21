@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProductCard from '../components/ProductCard.jsx'
 import { getProducts, getCategories } from '../services/api.js'
+import { useCart } from '../context/CartContext.jsx'
 
 export default function ProductosPage() {
   const [products, setProducts] = useState([])
+  const { addItem } = useCart()
   const [category, setCategory] = useState('Todos')
   const [categories, setCategories] = useState(['Todos'])
 
@@ -42,7 +44,7 @@ export default function ProductosPage() {
   }, [products, category])
 
   function handleAdd(p) {
-    alert(`Añadido: ${p.title}`)
+    addItem(p)
   }
 
   return (

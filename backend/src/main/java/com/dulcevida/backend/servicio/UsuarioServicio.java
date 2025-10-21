@@ -64,5 +64,7 @@ public class UsuarioServicio {
         });
     }
 
-    // Método de inhabilitación removido: el esquema actual no contempla estado en Usuario
+    public void eliminar(Integer id) {
+        usuarioRepositorio.deleteById(Objects.requireNonNull(id));
+    }
 }

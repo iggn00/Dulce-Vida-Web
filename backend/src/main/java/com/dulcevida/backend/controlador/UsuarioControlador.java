@@ -47,4 +47,9 @@ public class UsuarioControlador {
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        usuarioServicio.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
 }

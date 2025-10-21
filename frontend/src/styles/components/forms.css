@@ -1,0 +1,79 @@
+.tarjeta-formulario {
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.tarjeta-formulario .card-header {
+  background: var(--crema-clara);
+  color: var(--cacao);
+}
+.tarjeta-formulario .form-control:focus,
+.tarjeta-formulario .form-select:focus {
+  border-color: var(--oro);
+  box-shadow: 0 0 0 0.2rem rgba(176, 137, 104, 0.25);
+}
+.tarjeta-formulario .btn-dorado {
+  width: 100%;
+}
+.form-text { color: #6c757d; }
+.form-control,
+.form-select {
+  background-color: #fff;
+  border: 1.5px solid rgba(0, 0, 0, 0.18);
+  border-radius: 0.6rem;
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+.form-control:hover,
+.form-select:hover { border-color: var(--madera); }
+.form-control:focus,
+.form-select:focus {
+  background-color: #fff;
+  border-color: var(--madera);
+  box-shadow: 0 0 0 0.2rem rgba(62, 39, 35, 0.18);
+}
+.form-control::placeholder { color: #9aa0a6; opacity: 1; }
+.form-label { font-weight: 600; color: var(--cacao); }
+.modal-content { border: 1px solid rgba(0,0,0,0.1); border-radius: 0.8rem; overflow: hidden; }
+.modal-header, .modal-footer { background-color: var(--crema-clara); }
+.modal-body { background-color: #fff; }
+.modal .form-control, .modal .form-select { padding: 0.6rem 0.8rem; font-size: 1rem; }
+.modal .row.g-2 {
+  background: rgba(245, 232, 199, 0.35);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+/* Carrito responsivo (si se implementa más adelante) */
+.page-cart .table-responsive {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  padding: 0.25rem 0.5rem;
+}
+.page-cart .table thead th { background: var(--crema-clara); color: var(--cacao); border-bottom-color: rgba(0,0,0,0.08); }
+.page-cart .table tbody td { border-top-color: rgba(0,0,0,0.06); }
+.page-cart .table tfoot td { background: rgba(245,232,199,0.35); }
+.page-cart .resumen-compra { border: 1px solid rgba(0,0,0,0.06); }
+.page-cart .resumen-compra .card-body { background: #fff; }
+.page-cart #btn-pagar { background-color: #19a049; border-color: #199a47; }
+.page-cart #btn-pagar:hover { background-color: #168c41; border-color: #15823d; }
+.page-cart #cupon-msg { min-height: 1.25rem; }
+
+@media (max-width: 576px) {
+  .page-cart .table thead { display: none; }
+  .page-cart .table, .page-cart tbody, .page-cart tr, .page-cart td { display: block; width: 100%; }
+  .page-cart tbody tr { background: transparent; border: 0; margin: 0; padding: 0; }
+  .page-cart .cart-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 0.6rem; padding: 0.6rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .page-cart td { border: 0 !important; padding: 0.35rem 0.25rem; }
+  .page-cart td:first-child { padding-top: 0; }
+  .page-cart td:last-child { padding-bottom: 0; }
+  .page-cart .input-group { max-width: 130px; }
+  .page-cart img.object-fit-cover { width: 56px; height: 56px; object-fit: cover; }
+  .page-cart .btn-sm { padding: 0.25rem 0.5rem; }
+  .page-cart .d-flex.gap-2 { gap: 0.5rem !important; flex-wrap: wrap; }
+  .page-cart .resumen-compra { position: static !important; margin-top: 0.25rem; }
+}

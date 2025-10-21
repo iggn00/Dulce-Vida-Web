@@ -35,6 +35,6 @@ public class Usuario {
     private String password; // Almacenada temporalmente en texto plano (sin cifrar)
 
     @NotBlank
-    @Pattern(regexp = "ADMINISTRADOR|EMPLEADO|CLIENTE", message = "El rol debe ser ADMINISTRADOR, EMPLEADO o CLIENTE")
+    @Pattern(regexp = "ADMINISTRADOR|USUARIO", message = "El rol debe ser ADMINISTRADOR o USUARIO")
     private String rol; 
 }

@@ -1,0 +1,45 @@
+#productGrid .card.tarjeta-producto {
+  border: 1px solid #e6e6e6;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+#productGrid .card.tarjeta-producto:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+#productGrid .imagen-producto {
+  background: #efefef;
+  border: 1px solid #cfcfcf;
+  height: 160px;
+  overflow: hidden;
+}
+#productGrid .imagen-producto > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+#productGrid .titulo-producto {
+  color: #0d6efd;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+#productGrid .titulo-producto:hover {
+  text-decoration: underline;
+}
+#productGrid .card-body {
+  padding: 0.75rem 0.75rem 0.25rem;
+}
+#productGrid .card-body .small {
+  color: #6c757d;
+}
+#productGrid .card-footer {
+  background: transparent;
+  border: 0;
+  padding-top: 0;
+}
+@media (min-width: 992px) {
+  #productGrid {
+    --bs-gutter-x: 1.5rem;
+  }
+}

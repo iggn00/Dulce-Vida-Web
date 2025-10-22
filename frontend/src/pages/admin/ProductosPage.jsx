@@ -6,7 +6,7 @@ export default function ProductosPage() {
   const [q, setQ] = useState('')
   const [categorias, setCategorias] = useState([])
   const [categoriaId, setCategoriaId] = useState('')
-  const [form, setForm] = useState({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '' })
+  const [form, setForm] = useState({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '', ingredientes: '' })
   const [editId, setEditId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -66,7 +66,7 @@ export default function ProductosPage() {
       } else {
         await api.post('/productos', payload)
       }
-      setForm({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: categorias[0]?.idCategoria ? String(categorias[0].idCategoria) : '' })
+      setForm({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: categorias[0]?.idCategoria ? String(categorias[0].idCategoria) : '', ingredientes: '' })
       setEditId(null)
       cargar()
     } catch (e) {
@@ -131,11 +131,12 @@ export default function ProductosPage() {
         <div className="card">
           <div className="d-flex justify-content-between align-items-center">
             <h3>{editId ? 'Editar producto' : 'Crear producto'}</h3>
-            {editId && <button className="btn" type="button" onClick={()=>{ setEditId(null); setForm({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '' }) }}>Cancelar edición</button>}
+            {editId && <button className="btn" type="button" onClick={()=>{ setEditId(null); setForm({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '', ingredientes: '' }) }}>Cancelar edición</button>}
           </div>
           <form onSubmit={crear} className="form-grid">
             <label>Nombre<input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required /></label>
             <label>Descripción<textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} required /></label>
+            <label>Ingredientes<textarea value={form.ingredientes} onChange={(e) => setForm({ ...form, ingredientes: e.target.value })} placeholder="Ej: Harina, huevos, chocolate..." /></label>
             <label>Precio<input type="number" min="0" step="0.01" value={form.precio} onChange={(e) => setForm({ ...form, precio: Number(e.target.value) })} required /></label>
             <label>Stock<input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} required /></label>
             <label>Categoría<select value={form.idCategoria} onChange={(e) => setForm({ ...form, idCategoria: e.target.value })} required>
@@ -186,6 +187,7 @@ export default function ProductosPage() {
                         setForm({
                           nombre: p.nombre || '',
                           descripcion: p.descripcion || '',
+                          ingredientes: p.ingredientes || '',
                           precio: Number(p.precio) || 0,
                           stock: Number(p.stock) || 0,
                           idCategoria: p.categoria?.idCategoria ? String(p.categoria.idCategoria) : ''

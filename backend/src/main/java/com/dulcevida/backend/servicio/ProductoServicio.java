@@ -53,6 +53,7 @@ public class ProductoServicio {
             p.setStock(cambios.getStock());
             p.setCategoria(cambios.getCategoria());
             p.setImagenUrl(cambios.getImagenUrl());
+            p.setIngredientes(cambios.getIngredientes());
             p.setEstado(cambios.getEstado());
             productoRepositorio.save(p);
             return p;

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProductCard from '../components/ProductCard.jsx'
+import ProductDetailModal from '../components/ProductDetailModal.jsx'
 import { getProducts, getCategories } from '../services/api.js'
 import { useCart } from '../context/CartContext.jsx'
 
@@ -8,6 +9,8 @@ export default function ProductosPage() {
   const { addItem } = useCart()
   const [category, setCategory] = useState('Todos')
   const [categories, setCategories] = useState(['Todos'])
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     (async () => {
@@ -17,7 +20,7 @@ export default function ProductosPage() {
       ])
       // cats: [{idCategoria, nombre}]
       setCategories(['Todos', ...cats.map(c => c.nombre)])
-      // prods: [{idProducto, nombre, descripcion, precio, stock, imagenUrl, estado, categoria:{...}}]
+      // prods: [{idProducto, nombre, descripcion, precio, stock, imagenUrl, estado, categoria:{...}, ingredientes}]
       const mapped = prods
         .filter(p => p.estado === 'disponible')
         .map(p => ({
@@ -25,8 +28,10 @@ export default function ProductosPage() {
           title: p.nombre,
           attributes: p.descripcion,
           price: Number(p.precio),
+          stock: p.stock,
           image: p.imagenUrl ? ((import.meta.env.VITE_API_URL || 'http://localhost:8080') + p.imagenUrl) : undefined,
-          category: p.categoria?.nombre || 'Otros'
+          category: p.categoria?.nombre || 'Otros',
+          ingredientes: p.ingredientes
         }))
       setProducts(mapped)
     })()
@@ -47,6 +52,16 @@ export default function ProductosPage() {
     addItem(p)
   }
 
+  function handleViewDetail(product) {
+    setSelectedProduct(product)
+    setIsModalOpen(true)
+  }
+
+  function handleCloseModal() {
+    setIsModalOpen(false)
+    setSelectedProduct(null)
+  }
+
   return (
     <div>
       <h1 className="h4 mb-3">Nuestros productos</h1>
@@ -62,9 +77,16 @@ export default function ProductosPage() {
 
       <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
         {shown.map(p => (
-          <ProductCard key={p.id} product={p} onAdd={handleAdd} />
+          <ProductCard key={p.id} product={p} onAdd={handleAdd} onViewDetail={handleViewDetail} />
         ))}
       </div>
+
+      <ProductDetailModal 
+        product={selectedProduct} 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal}
+        onAdd={handleAdd}
+      />
     </div>
   )
 }

@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `Productos` (
   `precio` DECIMAL(10,2) NOT NULL,
   `stock` INT NOT NULL,
   `imagen_url` VARCHAR(255) NULL,
+  `ingredientes` TEXT NULL,
   `estado` ENUM('disponible', 'agotado') NOT NULL DEFAULT 'disponible',
   `id_categoria` INT NOT NULL,
   PRIMARY KEY (`id_producto`),
@@ -93,12 +94,12 @@ INSERT INTO `Categorias` (`nombre`, `descripcion`) VALUES
 ('Cupcakes', 'Cupcakes decorados y rellenos.'),
 ('Postres fríos', 'Postres para disfrutar bien helados.');
 
-INSERT INTO `Productos` (`nombre`, `descripcion`, `precio`, `stock`, `estado`, `imagen_url`, `id_categoria`) VALUES
-('Torta de Chocolate Intenso', 'Bizcocho de chocolate húmedo relleno de manjar y cubierto con ganache.', 25000, 10, 'disponible', 'url_imagen_torta_choco.jpg', 1),
-('Pie de Limón', 'Clásico pie de limón con base de galleta y merengue suizo.', 12000, 15, 'disponible', 'url_imagen_pie.jpg', 1),
-('Cupcake de Vainilla', 'Cupcake de vainilla con frosting de queso crema y chispas de colores.', 1500, 30, 'disponible', 'url_imagen_cupcake.jpg', 4),
-('Galletas de Avena y Miel', 'Pack de 6 galletas de avena y miel, crujientes y saludables.', 3500, 40, 'agotado', 'url_imagen_galletas.jpg', 3),
-('Cheesecake de Frutos Rojos', 'Suave cheesecake sobre una base de galleta, cubierto con mermelada casera de frutos rojos.', 18000, 12, 'agotado', 'url_imagen_cheesecake.jpg', 5);
+INSERT INTO `Productos` (`nombre`, `descripcion`, `precio`, `stock`, `estado`, `imagen_url`, `ingredientes`, `id_categoria`) VALUES
+('Torta de Chocolate Intenso', 'Bizcocho de chocolate húmedo relleno de manjar y cubierto con ganache.', 25000, 10, 'disponible', 'url_imagen_torta_choco.jpg', 'Harina, huevos, chocolate semi-amargo, manjar, mantequilla, azúcar, cacao en polvo', 1),
+('Pie de Limón', 'Clásico pie de limón con base de galleta y merengue suizo.', 12000, 15, 'disponible', 'url_imagen_pie.jpg', 'Galletas de vainilla, mantequilla, limones frescos, huevos, leche condensada, azúcar', 1),
+('Cupcake de Vainilla', 'Cupcake de vainilla con frosting de queso crema y chispas de colores.', 1500, 30, 'disponible', 'url_imagen_cupcake.jpg', 'Harina, huevos, mantequilla, azúcar, vainilla, queso crema, chispas de colores', 4),
+('Galletas de Avena y Miel', 'Pack de 6 galletas de avena y miel, crujientes y saludables.', 3500, 40, 'agotado', 'url_imagen_galletas.jpg', 'Avena integral, miel de abeja, mantequilla, harina integral, canela, nueces', 3),
+('Cheesecake de Frutos Rojos', 'Suave cheesecake sobre una base de galleta, cubierto con mermelada casera de frutos rojos.', 18000, 12, 'agotado', 'url_imagen_cheesecake.jpg', 'Queso crema, galletas Graham, fresas, frambuesas, arándanos, azúcar, crema de leche', 5);
 
 -- Formulario de contacto: tabla para almacenar envíos desde la web
 CREATE TABLE IF NOT EXISTS `Contactos` (

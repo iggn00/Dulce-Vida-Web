@@ -80,8 +80,20 @@ footer { color: #f7eada; }
 .footer-input { background-color: #fff; }
 
 /* Productos */
-.tarjeta-producto { border: 1px solid rgba(0,0,0,0.06); }
+.tarjeta-producto { 
+  border: 1px solid rgba(0,0,0,0.06); 
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.tarjeta-producto:hover { 
+  transform: translateY(-4px); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 .imagen-producto img { display: block; width: 100%; height: auto; object-fit: cover; }
+
+/* Modal de detalle de producto */
+.text-dorado {
+  color: var(--oro) !important;
+}
 
 /* Hero de home */
 #hero .hero-img { display: block; width: 100%; height: auto; object-fit: contain; }

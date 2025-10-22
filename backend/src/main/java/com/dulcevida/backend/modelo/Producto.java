@@ -51,6 +51,9 @@ public class Producto {
     @Size(max = 255, message = "La URL de imagen no debe superar 255 caracteres")
     @Column(name = "imagen_url")
     private String imagenUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String ingredientes;
     
     // Lombok annotations to replace getters and setters
 

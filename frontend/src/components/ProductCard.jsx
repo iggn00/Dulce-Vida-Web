@@ -12,6 +12,11 @@ export default function ProductCard({ product, onAdd, onViewDetail }) {
         <div className="card-body">
           <div className="fw-semibold">{product.title}</div>
           <div className="small text-muted">{product.attributes || ''}</div>
+          {product.ingredientes && (
+            <div className="small text-secondary mt-1" title={product.ingredientes}>
+              {(product.ingredientes.length > 70) ? product.ingredientes.slice(0,70) + '…' : product.ingredientes}
+            </div>
+          )}
         </div>
         <div className="card-footer bg-transparent border-0 pt-0">
           <div className="d-flex justify-content-between align-items-center">

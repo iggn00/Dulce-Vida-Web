@@ -24,7 +24,7 @@ public class ProductoServicio {
     }
 
     public List<Producto> buscarPorNombre(String texto) {
-        return productoRepositorio.findByNombreContainingIgnoreCase(texto);
+        return productoRepositorio.findByNombreContainingIgnoreCaseOrIngredientesContainingIgnoreCase(texto, texto);
     }
 
     public List<Producto> buscarPorCategoriaNombre(String nombre) {

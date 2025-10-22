@@ -2,6 +2,8 @@ package com.dulcevida.backend.controlador;
 
 import com.dulcevida.backend.modelo.Producto;
 import com.dulcevida.backend.servicio.ProductoServicio;
+import com.dulcevida.backend.servicio.UsuarioServicio;
+import com.dulcevida.backend.modelo.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,8 +35,23 @@ public class ProductoControlador {
     @Autowired
     private ProductoServicio productoServicio;
 
+    @Autowired
+    private UsuarioServicio usuarioServicio;
+
     @Value("${app.uploads.dir:uploads/imagenes_productos}")
     private String directorioUploads;
+
+    @Value("${app.admin.email:admin@dulcevida.cl}")
+    private String adminEmailPermitido;
+
+    private boolean esAdminPermitido(HttpSession session){
+        Object id = session.getAttribute("usuarioId");
+        if (id == null) return false;
+    return usuarioServicio.buscarPorId((Integer) id)
+        .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR")
+            || (u.getEmail() != null && u.getEmail().equalsIgnoreCase(adminEmailPermitido)))
+        .orElse(false);
+    }
 
     @GetMapping
     public List<Producto> listar() {
@@ -65,24 +83,28 @@ public class ProductoControlador {
     }
 
     @PostMapping
-    public ResponseEntity<Producto> crear(@Valid @RequestBody Producto producto) {
+    public ResponseEntity<?> crear(@Valid @RequestBody Producto producto, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         return ResponseEntity.status(HttpStatus.CREATED).body(productoServicio.crear(producto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Producto cambios) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Producto cambios, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.actualizar(id, cambios);
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> inhabilitar(@PathVariable Integer id) {
+    public ResponseEntity<?> inhabilitar(@PathVariable Integer id, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.inhabilitar(id);
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/imagen")
-    public ResponseEntity<?> subirImagen(@PathVariable Integer id, @RequestParam MultipartFile archivo) {
+    public ResponseEntity<?> subirImagen(@PathVariable Integer id, @RequestParam MultipartFile archivo, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.buscarPorId(id);
         if (opt.isEmpty()) {
             return ResponseEntity.notFound().build();

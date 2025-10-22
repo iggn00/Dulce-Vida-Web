@@ -3,6 +3,8 @@ import ProductCard from '../components/ProductCard.jsx'
 import ProductDetailModal from '../components/ProductDetailModal.jsx'
 import { getProducts, getCategories } from '../services/api.js'
 import { useCart } from '../context/CartContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
+import { useNavigate } from 'react-router-dom'
 
 export default function ProductosPage() {
   const [products, setProducts] = useState([])
@@ -11,6 +13,8 @@ export default function ProductosPage() {
   const [categories, setCategories] = useState(['Todos'])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { isAuthenticated } = useAuth()
+  const nav = useNavigate()
 
   useEffect(() => {
     (async () => {
@@ -49,6 +53,10 @@ export default function ProductosPage() {
   }, [products, category])
 
   function handleAdd(p) {
+    if (!isAuthenticated) {
+      nav('/login')
+      return
+    }
     addItem(p)
   }
 

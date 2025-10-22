@@ -160,6 +160,7 @@ export default function ProductosPage() {
                   <th>ID</th>
                   <th>Nombre</th>
                   <th>Categoría</th>
+                  <th className="w-25">Ingredientes</th>
                   <th>Precio</th>
                   <th>Stock</th>
                   <th>Imagen</th>
@@ -172,6 +173,11 @@ export default function ProductosPage() {
                     <td>{p.idProducto}</td>
                     <td>{p.nombre}</td>
                     <td>{p.categoria?.nombre}</td>
+                    <td>
+                      <div className="small text-muted" title={p.ingredientes || ''}>
+                        {(p.ingredientes || '').length > 80 ? (p.ingredientes || '').slice(0,80) + '…' : (p.ingredientes || '')}
+                      </div>
+                    </td>
                     <td>${p.precio}</td>
                     <td>{p.stock}</td>
                     <td>

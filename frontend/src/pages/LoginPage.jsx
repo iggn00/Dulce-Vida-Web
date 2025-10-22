@@ -13,7 +13,7 @@ export default function LoginPage() {
     e.preventDefault()
     const ok = await login(email, password)
     if (ok) {
-      if ((user?.rol || JSON.parse(localStorage.getItem('dv_auth'))?.rol) === 'ADMINISTRADOR') nav('/admin/dashboard')
+  if ((user?.rol) === 'ADMINISTRADOR') nav('/admin/dashboard')
       else nav('/')
     }
     else setError('Credenciales inválidas')

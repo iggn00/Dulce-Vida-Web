@@ -244,8 +244,7 @@ Alternativa compatible:
 - ✅ Carrito de compras con estado en sesión  
 - ✅ Panel administrativo: productos, usuarios y categorías  
 - ✅ Carga y servido de imágenes de productos  
-- ✅ Rutas públicas y de sesión; control de roles básico  
-- 🚧 Validaciones avanzadas, pruebas y documentación ampliada
+- ✅ Rutas públicas y de sesión; control de roles básico 
 
 ---
 
@@ -274,16 +273,12 @@ Alternativa compatible:
 | ✅     | CRUD de productos y categorías                         |
 | ✅     | Carrito y checkout con validaciones básicas            |
 | ✅     | Subida y servido de imágenes                           |
-| 🚧     | Test automatizados, documentación ampliada y despliegue|
 
 ---
 
 ## 🪄 Próximos pasos
 
-- 🔐 Endurecer autorización por rol en endpoints críticos  
-- 🧪 Pruebas unitarias/e2e y CI básica  
-- 🐳 Contenerización con Docker (multi-stage para Vite + Spring)  
-- ☁️ Despliegue en servicios gestionados (Render, Railway, Vercel + API)  
+- 🔐 Endurecer autorización por rol en endpoints críticos, agregar JWT y BCrypt
 
 ---
 

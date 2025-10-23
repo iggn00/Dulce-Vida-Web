@@ -16,23 +16,39 @@ public class CarritoControlador {
 
     @GetMapping
     public ResponseEntity<?> obtener(HttpSession session){
-        return ResponseEntity.ok(carritoServicio.obtenerCarrito(session));
+        try {
+            return ResponseEntity.ok(carritoServicio.obtenerCarrito(session));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Usuario no autenticado"));
+        }
     }
 
     @PostMapping("/add")
     public ResponseEntity<?> agregar(@RequestBody Map<String, Integer> body, HttpSession session){
-        Integer idProducto = body.get("idProducto");
-        Integer cantidad = body.getOrDefault("cantidad", 1);
-        return ResponseEntity.ok(carritoServicio.agregar(session, idProducto, cantidad));
+        try {
+            Integer idProducto = body.get("idProducto");
+            Integer cantidad = body.getOrDefault("cantidad", 1);
+            return ResponseEntity.ok(carritoServicio.agregar(session, idProducto, cantidad));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Usuario no autenticado"));
+        }
     }
 
     @DeleteMapping("/item/{idDetalle}")
     public ResponseEntity<?> quitar(@PathVariable Integer idDetalle, HttpSession session){
-        return ResponseEntity.ok(carritoServicio.quitar(session, idDetalle));
+        try {
+            return ResponseEntity.ok(carritoServicio.quitar(session, idDetalle));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Usuario no autenticado"));
+        }
     }
 
     @DeleteMapping("/clear")
     public ResponseEntity<?> limpiar(HttpSession session){
-        return ResponseEntity.ok(carritoServicio.limpiar(session));
+        try {
+            return ResponseEntity.ok(carritoServicio.limpiar(session));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Usuario no autenticado"));
+        }
     }
 }

@@ -1,15 +1,34 @@
+/* ===============================
+	 Panel de Administración (responsive)
+	 - Sidebar tipo rail colapsable (desktop)
+	 - Sidebar como overlay (móvil)
+	 - Topbar sticky y contenido centrado
+	 - Dashboard hero cards + utilidades
+	 Usa la paleta definida en variables.css: var(--cacao), --oro, --crema, --rosa, --oliva
+	 =============================== */
+
 /* Shell y tema */
-.admin-shell{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 64px);background:linear-gradient(180deg,#f9f4ee, #fff)}
-.admin-shell.is-collapsed{grid-template-columns:88px 1fr}
+.admin-shell{--sidebar-w:260px;display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh;background:linear-gradient(180deg,#f9f4ee,#fff);width:100%;max-width:100%;overflow-x:hidden}
+.admin-shell.is-collapsed{--sidebar-w:72px}
+.admin-shell.is-collapsed .admin-brand .brand-text{display:none}
+.admin-shell.is-collapsed .admin-link .text{display:none}
+.admin-shell.is-collapsed .admin-sidebar-footer .meta{display:none}
+/* Expandir en hover (solo desktop) */
+.admin-shell.is-collapsed.is-hover{--sidebar-w:260px}
+.admin-shell.is-collapsed.is-hover .admin-brand .brand-text,
+.admin-shell.is-collapsed.is-hover .admin-link .text,
+.admin-shell.is-collapsed.is-hover .admin-sidebar-footer .meta{display:flex}
 
 /* Sidebar */
-.admin-sidebar{position:sticky;top:64px;height:calc(100vh - 64px);background:linear-gradient(180deg,var(--cacao) 0%, #3a2622 100%);color:#fff;display:flex;flex-direction:column;gap:.75rem;transition:transform .25s ease,width .25s ease;overflow:auto}
+.admin-sidebar{position:sticky;top:0;height:100dvh;background:linear-gradient(180deg,var(--cacao) 0%, #3a2622 100%);color:#fff;display:flex;flex-direction:column;gap:.75rem;transition:transform .25s ease,width .25s ease;overflow-y:auto;overflow-x:hidden;width:var(--sidebar-w);z-index:2001;scrollbar-width:none;-ms-overflow-style:none}
+.admin-sidebar::-webkit-scrollbar{display:none}
 .admin-brand{display:flex;align-items:center;gap:.6rem;padding:1rem .9rem;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand-text{font-weight:700;letter-spacing:.3px}
 .admin-nav{display:flex;flex-direction:column;padding:.5rem}
 .admin-link{display:flex;align-items:center;gap:.75rem;color:#f7eada;text-decoration:none;padding:.6rem .8rem;border-radius:.6rem;transition:background .2s ease, transform .12s ease}
 .admin-link:hover{background:rgba(255,255,255,.08);transform:translateX(2px)}
 .admin-link.active{background:rgba(255,255,255,.14)}
+.admin-link .icon{width:24px;display:inline-grid;place-items:center}
 .admin-sidebar-footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;border-top:1px solid rgba(255,255,255,.08)}
 .btn-sidebar{background:transparent;border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:.6rem;padding:.4rem .65rem}
 .userbox{display:flex;align-items:center;gap:.6rem}
@@ -19,8 +38,8 @@
 .userbox .role{font-size:.78rem;opacity:.85}
 
 /* Main + topbar */
-.admin-main{display:flex;flex-direction:column;min-width:0}
-.admin-topbar{position:sticky;top:64px;z-index:5;background:rgba(255,255,255,.9);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.6rem .9rem}
+.admin-main{display:flex;flex-direction:column;min-width:0;width:100%;background:linear-gradient(180deg,#fbf7f2,#fff)}
+.admin-topbar{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.9);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid rgba(0,0,0,.06);display:block;gap:.75rem;padding:.6rem 0}
 .admin-topbar .left{display:flex;align-items:center;gap:.6rem}
 .btn.btn-icon{border:1px solid rgba(0,0,0,.12);border-radius:.6rem;padding:.34rem .55rem;background:#fff}
 .page-headings{display:flex;flex-direction:column}
@@ -30,57 +49,132 @@
 .right .userpill .avatar{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;background:#ecd9c8;color:#3e2723;font-weight:700}
 
 /* Contenido */
-.admin-content{padding:1.1rem}
-.toolbar{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:.9rem}
+.admin-content{padding:1.1rem;width:100%;max-width:100%}
+.admin-container{width:100%;max-width:1360px;margin:0 auto;padding:0 12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
 .toolbar > *{min-width:180px}
-.grid{display:grid;gap:1.1rem}
-@media (min-width: 768px){.grid{grid-template-columns:1fr 1fr}}
-.form-grid{display:grid;gap:.8rem}
-@media (min-width: 768px){
-  .form-grid{grid-template-columns:1fr 1fr}
-  .form-grid label:nth-child(2){grid-column:1 / -1}
+/* Grid base y variantes para layouts conocidos */
+.grid{display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+/* Dos columnas responsivas: formulario + tabla */
+.grid.grid-2{grid-template-columns:1fr}
+@media (min-width: 992px){
+	.grid.grid-2{grid-template-columns:420px 1fr;align-items:start}
 }
+@media (min-width: 1400px){
+	.grid.grid-2{grid-template-columns:480px 1fr}
+}
+@media (min-width:768px){.grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
+.form-grid{display:grid;gap:.8rem}
+@media (min-width: 768px){.form-grid{grid-template-columns:1fr 1fr}.form-grid label:nth-child(2){grid-column:1 / -1}}
+.form-grid label{display:flex;flex-direction:column;gap:.35rem;color:#3e2723;font-weight:600}
+.form-grid input,.form-grid select,.form-grid textarea{border:1px solid rgba(0,0,0,.28);border-radius:.6rem;padding:.6rem .75rem;background:#fff;min-height:40px;color:#2f1d1b}
+.form-grid input::placeholder,.form-grid textarea::placeholder{color:#8a7f79}
+.form-grid textarea{min-height:88px;resize:vertical}
+.form-grid input:focus,.form-grid select:focus,.form-grid textarea:focus{outline:none;border-color:#9f7354;box-shadow:0 0 0 3px rgba(159,115,84,.28)}
 .admin-animate-in{animation:fadeUp .25s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
+/* Backdrop global (fuera del flujo del grid, no empuja el sidebar) */
+.admin-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(1px);z-index:4;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.admin-backdrop.is-open{opacity:1;pointer-events:auto}
+
+/* Botón flotante para menú (desktop) */
+.admin-fab{position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:7;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:.5rem .6rem;box-shadow:0 6px 18px rgba(0,0,0,.08);opacity:.9}
+.admin-fab:hover{opacity:1;background:#fcfaf8}
+
 /* Paneles, tablas y feedback */
-.admin-content .card{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:.9rem;box-shadow:0 6px 18px rgba(0,0,0,.05);}
+.admin-content .card{background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:.9rem;box-shadow:0 10px 26px rgba(0,0,0,.08)}
+.admin-content .card.table-card{padding:1rem}
 .admin-content .card h3{font-size:1.05rem;margin-bottom:.85rem}
 .admin-content .card.stat{display:flex;flex-direction:column;align-items:flex-start;gap:.25rem}
 .admin-content .card .big{font-weight:700;font-size:1.7rem;color:var(--cacao)}
-.admin-content .btn{background:#fff;border:1px solid rgba(0,0,0,.14);border-radius:.6rem;padding:.45rem .75rem}
+.admin-content .btn{background:#fff;border:1px solid rgba(0,0,0,.18);border-radius:.6rem;padding:.45rem .75rem}
 .admin-content .btn:hover{background:#fcfaf8}
+.admin-content .btn-primary{background:var(--oro);border-color:var(--oro);color:#fff}
+.admin-content .btn-primary:hover{background:#9f7354;border-color:#9f7354}
+.admin-content .btn-danger{background:#fce8e6;border-color:#f5c2c7;color:#8a1c1c}
+.admin-content .btn-danger:hover{background:#f9d6d3}
 .admin-content .error{margin-top:.6rem;color:#b42318;background:#fee4e2;border:1px solid #fda29b;border-radius:.6rem;padding:.6rem}
-.admin-content .table thead th{background:#faf7f4;position:sticky;top:0;z-index:1}
-.admin-content .table tbody tr:hover{background:#fffaf6}
+.admin-content .table thead th{background:#f3ede6;position:sticky;top:0;z-index:1;border-bottom:1px solid rgba(0,0,0,.18)}
+.admin-content .table tbody td{background:#ffffff;border-bottom:1px solid rgba(0,0,0,.10)}
+.admin-content .table tbody tr:nth-child(odd) td{background:#f7f2ec}
+.admin-content .table tbody tr:hover td{background:#f1e8dd}
 .badge-soft{background:#fff3cd;color:#856404;border:1px solid #ffeeba;border-radius:.5rem;padding:.15rem .4rem;font-size:.78rem}
+.admin-content .table-card .table{width:100%;min-width:720px}
+.admin-content .table-card .table td,.admin-content .table-card .table th{vertical-align:middle}
+.admin-content .table-card .table tbody tr{transition:transform .12s ease, background .12s ease}
+.admin-content .table-card .table tbody tr:hover{transform:translateX(2px)}
+
+/* Viewport limitado para listas largas: scroll vertical dentro de la tarjeta */
+.table-viewport{overflow:auto;overscroll-behavior:contain;max-height:clamp(420px, 70dvh, 820px);border-radius:.6rem}
+.table-viewport::-webkit-scrollbar{height:10px;width:10px}
+.table-viewport::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:999px}
+.table-viewport::-webkit-scrollbar-track{background:rgba(0,0,0,.05);border-radius:999px}
+
+/* Modal emergente centrado */
+.admin-modal{position:fixed;inset:0;z-index:1060;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .2s ease}
+.admin-modal.is-open{opacity:1;pointer-events:auto}
+.admin-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.50);backdrop-filter:blur(2px)}
+.admin-modal-card{position:relative;background:#fff;border:1px solid rgba(0,0,0,.14);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.22);width:min(880px, 96vw);max-height:92dvh;display:flex;flex-direction:column;overflow:hidden}
+.admin-modal-header{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-bottom:1px solid rgba(0,0,0,.12)}
+.admin-modal-body{padding:1rem;overflow:auto}
+.admin-modal-footer{padding:.75rem 1rem;border-top:1px solid rgba(0,0,0,.12);display:flex;gap:.5rem;justify-content:flex-end}
+
+/* El backdrop cubre todo; la barra lateral queda arriba por z-index */
+
+/* Drawer/Panel de edición */
+.edit-drawer{position:fixed;inset:0 0 0 auto;display:grid;place-items:stretch;max-width:100vw;pointer-events:none;z-index:1050}
+.edit-drawer.is-open{pointer-events:auto}
+.edit-drawer-card{position:relative;margin-left:auto;height:100dvh;max-height:100dvh;width:min(560px, 96vw);background:#fff;border-left:1px solid rgba(0,0,0,.08);box-shadow:-24px 0 48px rgba(0,0,0,.12);transform:translateX(110%);transition:transform .25s ease}
+.edit-drawer.is-open .edit-drawer-card{transform:none}
+.edit-drawer-header{position:sticky;top:0;background:#fff;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;z-index:1}
+.edit-drawer-body{padding:1rem;overflow:auto}
+.edit-drawer-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid rgba(0,0,0,.06);padding:.75rem 1rem;display:flex;gap:.5rem;justify-content:flex-end}
+.edit-drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(1px);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:1040}
+.edit-drawer-backdrop.is-open{opacity:1;pointer-events:auto}
+
+/* Dashboard nuevo (hero cards) */
+.dash-page{padding:.25rem 0}
+.dash-title{font-size:1.6rem;margin:0 0 .75rem 0;color:var(--cacao)}
+.dash-title span{font-weight:800}
+.cards-hero{display:grid;gap:1rem;grid-template-columns:1fr}
+@media (min-width: 576px){.cards-hero{grid-template-columns:repeat(2, minmax(0,1fr))}}
+@media (min-width: 992px){.cards-hero{grid-template-columns:repeat(3, minmax(0,1fr))}}
+@media (min-width: 1200px){.cards-hero{grid-template-columns:repeat(4, minmax(0,1fr))}}
+.dash-card{position:relative;display:flex;align-items:center;gap:.75rem;min-height:112px;border-radius:18px;padding:1rem;border:1px solid rgba(0,0,0,.06);box-shadow:0 12px 24px rgba(0,0,0,.06);text-decoration:none;color:inherit;overflow:hidden}
+.dash-card:hover{transform:translateY(-2px);box-shadow:0 18px 32px rgba(0,0,0,.08);transition:.18s ease}
+.dash-card::after{content:"";position:absolute;inset:0;border-radius:18px;background:radial-gradient(1200px 220px at -20% -60%, rgba(255,255,255,.35), transparent 60%)}
+.dash-card-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.45);backdrop-filter:blur(2px);font-size:1.25rem}
+.dash-card-body{position:relative;z-index:1;display:flex;flex-direction:column}
+.dash-card-title{font-weight:700}
+.dash-card-subtitle{font-size:.78rem;opacity:.8;margin-top:-2px}
+.dash-card-value{font-size:2rem;font-weight:800;line-height:1;margin-top:.15rem}
+
+/* Variantes con la paleta del proyecto */
+.dash-card.violeta{background:linear-gradient(135deg, var(--rosa), color-mix(in srgb, var(--rosa) 30%, var(--crema) 70%))}
+.dash-card.azul{background:linear-gradient(135deg, color-mix(in srgb, var(--crema) 85%, #ffffff 15%), color-mix(in srgb, var(--cacao) 20%, var(--crema) 80%))}
+.dash-card.verde{background:linear-gradient(135deg, color-mix(in srgb, var(--oliva) 85%, #ffffff 15%), color-mix(in srgb, var(--crema) 60%, var(--oliva) 40%))}
+.dash-card.oro{background:linear-gradient(135deg, color-mix(in srgb, var(--oro) 85%, #ffffff 15%), color-mix(in srgb, var(--crema) 55%, var(--oro) 45%))}
 
 /* Skeleton */
 .skeleton{position:relative;overflow:hidden;background:#f1ece7;border-radius:.5rem}
 .skeleton::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:shimmer 1.2s infinite}
 @keyframes shimmer{100%{transform:translateX(100%)}}
 
-/* Responsive */
-@media (max-width: 767.98px){
-  .admin-shell{grid-template-columns:1fr}
-  .admin-topbar{top:56px}
-  .admin-sidebar{position:fixed;top:56px;left:0;right:0;max-height:70vh;transform:translateY(-110%);border-bottom:1px solid rgba(255,255,255,.12);z-index:6;border-bottom-left-radius:.9rem;border-bottom-right-radius:.9rem}
-  .admin-sidebar.is-open{transform:translateY(0)}
-  .admin-backdrop{position:fixed;inset:56px 0 0 0;background:rgba(0,0,0,.35);backdrop-filter:blur(1px);z-index:4;opacity:0;pointer-events:none;transition:opacity .2s ease}
-  .admin-backdrop.is-open{opacity:1;pointer-events:auto}
-  .toolbar > *{flex:1 1 100%; min-width:0}
-  .grid{grid-template-columns:1fr}
-  .table-responsive{border:1px solid rgba(0,0,0,.08);border-radius:.6rem;overflow:auto}
-  .table td .d-flex{flex-wrap:wrap;gap:.5rem}
+/* Responsive: móvil y tablet en overlay hasta 991px */
+@media (max-width: 991.98px){
+	.admin-shell{grid-template-columns:1fr}
+	.admin-topbar{top:0}
+	.admin-sidebar{position:fixed;top:0;left:0;bottom:0;height:auto;max-height:100dvh;transform:translateX(-100%);border-right:1px solid rgba(255,255,255,.12);z-index:6;border-bottom-left-radius:0;border-bottom-right-radius:0;width:min(86vw,320px)}
+	.admin-sidebar.is-open{transform:translateX(0)}
+	/* en móvil no aplicamos mini/hover */
+	.admin-shell.is-collapsed{grid-template-columns:1fr}
+	.toolbar > *{flex:1 1 100%; min-width:0}
+	.grid{grid-template-columns:1fr}
+	.table-responsive{border:1px solid rgba(0,0,0,.08);border-radius:.6rem;overflow:auto}
+	.table td .d-flex{flex-wrap:wrap;gap:.5rem}
 }
 
-/* Cartas y tablas dentro del admin */
-.admin-content .card{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:.75rem;box-shadow:0 4px 16px rgba(0,0,0,.04);}
-.admin-content .card h3{font-size:1rem;margin-bottom:.75rem}
-.admin-content .card.stat{display:flex;flex-direction:column;align-items:flex-start;gap:.25rem}
-.admin-content .card .big{font-weight:700;font-size:1.6rem;color:var(--cacao)}
-.admin-content .btn{background:#fff;border:1px solid rgba(0,0,0,.15);border-radius:.5rem;padding:.4rem .7rem}
-.admin-content .btn:hover{background:#f9f7f5}
-.admin-content .error{margin-top:.5rem;color:#b42318;background:#fee4e2;border:1px solid #fda29b;border-radius:.5rem;padding:.5rem}
-.admin-content .table thead th{background:#faf7f4;position:sticky;top:0;z-index:1}
-.admin-content .table tbody tr:hover{background:#fffaf6}
+/* Ajustes de desktop a partir de 992px: rail y contenido centrado */
+@media (min-width: 1400px){.admin-container{max-width:1560px}}
+

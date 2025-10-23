@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet, Navigate } from 'react-router-dom'
+import { Routes, Route, Outlet, Navigate, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import './App.css'
@@ -19,10 +19,12 @@ import CartPage from './pages/CartPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 
 function Layout() {
+  const location = useLocation()
+  const isAdmin = location.pathname.startsWith('/admin')
   return (
     <div className="bg-crema d-flex flex-column min-vh-100">
       <Navbar />
-      <main className="container py-4 flex-grow-1">
+      <main className={`${isAdmin ? 'px-0' : 'container'} py-4 flex-grow-1`}>
         <Outlet />
       </main>
       <Footer />
@@ -47,6 +49,7 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
       <Routes>
+        {/* Rutas públicas con Navbar/Footer */}
         <Route path="/" element={<Layout />}> 
           <Route index element={<HomePage />} />
           <Route path="productos" element={<ProductosPage />} />
@@ -55,15 +58,18 @@ export default function App() {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="carrito" element={<CartPage />} />
-          <Route path="admin" element={<ProtectedRoute requiredRoles={["ADMINISTRADOR"]} />}> 
-            <Route element={<AdminLayoutShell title="Panel" />}> 
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="usuarios" element={<UsuariosPage />} />
-              <Route path="productos" element={<AdminProductosPage />} />
-              <Route path="contactos" element={<AdminContactosPage />} />
-            </Route>
+        </Route>
+
+        {/* Panel de administración FULL (sin Navbar/Footer públicos) */}
+        <Route path="/admin" element={<ProtectedRoute requiredRoles={["ADMINISTRADOR"]} />}> 
+          <Route element={<AdminLayoutShell title="Panel" />}> 
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="usuarios" element={<UsuariosPage />} />
+            <Route path="productos" element={<AdminProductosPage />} />
+            <Route path="contactos" element={<AdminContactosPage />} />
           </Route>
         </Route>
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </CartProvider>

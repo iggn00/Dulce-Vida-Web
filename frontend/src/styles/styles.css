@@ -17,12 +17,14 @@
   --bs-light: var(--crema);
   --bs-dark: var(--cacao);
 }
-html, body { height: 100%; }
+html, body { height: 100%; margin: 0; }
 body { background-color: var(--bs-body-bg); color: var(--bs-body-color); }
 body { display: flex; flex-direction: column; min-height: 100vh; }
-/* Compensación para navbar fixed-top */
+/* Compensación para navbar fixed-top (solo para el sitio público) */
 body { padding-top: 56px; }
 @media (min-width: 768px) { body { padding-top: 64px; } }
+/* Cuando está presente el panel admin, no necesitamos esa compensación */
+body:has(.admin-shell), body.is-admin { padding-top: 0 !important; }
 main { flex: 1 0 auto; }
 footer { flex-shrink: 0; }
 

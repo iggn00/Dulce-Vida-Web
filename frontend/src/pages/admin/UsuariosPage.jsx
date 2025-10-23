@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import EditDrawer from '../../components/admin/EditDrawer.jsx'
 import { api } from '../../services/http'
 
 export default function UsuariosPage() {
@@ -6,6 +7,7 @@ export default function UsuariosPage() {
   const [q, setQ] = useState('')
   const [form, setForm] = useState({ nombre: '', email: '', password: '', rol: 'USUARIO', estado: 'activo' })
   const [editId, setEditId] = useState(null)
+  const [showEdit, setShowEdit] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -82,13 +84,39 @@ export default function UsuariosPage() {
     }
   }
 
+  const guardarEdicion = async (e) => {
+    e.preventDefault()
+    if (!editId) return
+    setError('')
+    setLoading(true)
+    const errs = validarUsuario(form)
+    if (errs.length) {
+      setError(errs.join(', '))
+      setLoading(false)
+      return
+    }
+    try {
+      const payload = { nombre: form.nombre, email: form.email, rol: form.rol, estado: form.estado }
+      if (form.password) payload.password = form.password
+      await api.put(`/usuarios/${editId}`, payload)
+      setEditId(null)
+      setShowEdit(false)
+      cargar()
+    } catch (e) {
+      const resp = e?.response?.data
+      setError(resp?.errores ? resp.errores.join(', ') : (resp?.mensaje || 'Error actualizando usuario'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="page">
       <div className="toolbar">
         <input placeholder="Buscar por nombre o email" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
-      <div className="grid">
+  <div className="grid grid-2">
         <div className="card">
           <div className="d-flex justify-content-between align-items-center">
             <h3 className="m-0">{editId ? 'Editar usuario' : 'Crear usuario'}</h3>
@@ -136,7 +164,7 @@ export default function UsuariosPage() {
                     <td>{u.rol}</td>
                     <td>{u.estado}</td>
                     <td className="d-flex gap-2">
-                      <button className="btn" onClick={()=>{ setEditId(u.idUsuario); setForm({ nombre: u.nombre, email: u.email, password: '', rol: u.rol, estado: u.estado || 'activo' }) }}>Editar</button>
+                      <button className="btn" onClick={()=>{ setEditId(u.idUsuario); setForm({ nombre: u.nombre, email: u.email, password: '', rol: u.rol, estado: u.estado || 'activo' }); setShowEdit(true) }}>Editar</button>
                       <button className="btn" onClick={()=> eliminar(u.idUsuario)}>Eliminar</button>
                     </td>
                   </tr>
@@ -147,6 +175,28 @@ export default function UsuariosPage() {
           )}
         </div>
       </div>
+
+      {/* Drawer de edición de usuario */}
+      <EditDrawer title="Editar usuario" open={showEdit} onClose={()=>{ setShowEdit(false); setEditId(null) }}>
+        <form className="form-grid" onSubmit={guardarEdicion}>
+          <label>Nombre<input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required /></label>
+          <label>Email<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /></label>
+          <label>Contraseña<input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Dejar en blanco para no cambiar" /></label>
+          <label>Rol<select value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value })}>
+            <option>USUARIO</option>
+            <option>ADMINISTRADOR</option>
+          </select></label>
+          <label>Estado<select value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })}>
+            <option value="activo">activo</option>
+            <option value="inactivo">inactivo</option>
+          </select></label>
+          <div style={{display:'flex',gap:'.5rem',marginTop:'.25rem'}}>
+            <button className="btn btn-primary" type="submit" disabled={loading}>Guardar cambios</button>
+            <button className="btn" type="button" onClick={()=>{ setShowEdit(false); setEditId(null) }}>Cancelar</button>
+          </div>
+          {error && <div className="error">{error}</div>}
+        </form>
+      </EditDrawer>
     </div>
   )
 }

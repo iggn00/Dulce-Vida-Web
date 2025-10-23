@@ -3,7 +3,6 @@ package com.dulcevida.backend.controlador;
 import com.dulcevida.backend.modelo.Producto;
 import com.dulcevida.backend.servicio.ProductoServicio;
 import com.dulcevida.backend.servicio.UsuarioServicio;
-import com.dulcevida.backend.modelo.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,8 +21,11 @@ import java.nio.file.Path;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -56,6 +58,12 @@ public class ProductoControlador {
         return productos;
     }
 
+    // Versión paginada cuando se incluyen los parámetros page y size
+    @GetMapping(params = {"page", "size"})
+    public Page<Producto> listarPaginado(Pageable pageable) {
+        return productoServicio.listar(pageable);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Integer id) {
         Optional<Producto> opt = productoServicio.buscarPorId(id);
@@ -81,20 +89,54 @@ public class ProductoControlador {
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody Producto producto, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
-        return ResponseEntity.status(HttpStatus.CREATED).body(productoServicio.crear(producto));
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(productoServicio.crear(producto));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Producto cambios, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
-        Optional<Producto> opt = productoServicio.actualizar(id, cambios);
-        return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        try {
+            Optional<Producto> opt = productoServicio.actualizar(id, cambios);
+            return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> inhabilitar(@PathVariable Integer id, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.inhabilitar(id);
+        return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}/hard")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+        if (productoServicio.buscarPorId(id).isEmpty()) return ResponseEntity.notFound().build();
+        productoServicio.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<?> actualizarEstado(@PathVariable Integer id, @RequestBody Map<String, String> body, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+        String estado = body != null ? body.get("estado") : null;
+        if (estado == null || !(estado.equalsIgnoreCase("disponible") || estado.equalsIgnoreCase("agotado"))) {
+            return ResponseEntity.badRequest().body("Estado inválido. Use 'disponible' o 'agotado'");
+        }
+        Optional<Producto> opt = productoServicio.actualizarEstado(id, estado.toLowerCase());
+        return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/restaurar")
+    public ResponseEntity<?> restaurar(@PathVariable Integer id, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+        Optional<Producto> opt = productoServicio.actualizarEstado(id, "disponible");
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

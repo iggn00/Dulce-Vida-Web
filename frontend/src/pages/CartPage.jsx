@@ -1,13 +1,15 @@
 import { useCart } from '../context/CartContext.jsx'
 
 export default function CartPage() {
-  const { items, total, removeItem, clear } = useCart()
+  const { items, total, removeItem, clear, checkout } = useCart()
   const pagar = async () => {
-    // Simula pago: muestra mensaje y limpia carrito (backend + frontend)
     try {
-      alert('Pago simulado con éxito. ¡Gracias por tu compra!')
-      await clear()
+      const data = await checkout()
+      const totalFmt = new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(Number(data?.total||0))
+      alert(`Pedido #${data?.pedidoId} confirmado. Total: ${totalFmt}. ¡Gracias por tu compra!`)
     } catch (e) {
+      const msg = e?.response?.data?.error || 'No pudimos finalizar tu compra.'
+      alert(msg)
       console.error(e)
     }
   }

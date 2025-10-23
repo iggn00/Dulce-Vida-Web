@@ -7,6 +7,11 @@ export default function ProductosPage() {
   const [q, setQ] = useState('')
   const [categorias, setCategorias] = useState([])
   const [categoriaId, setCategoriaId] = useState('')
+  const [page, setPage] = useState(0)
+  const [size, setSize] = useState(10)
+  const [sort, setSort] = useState('idProducto,desc')
+  const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
   const [form, setForm] = useState({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '', ingredientes: '' })
   const [formCreate, setFormCreate] = useState({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '', ingredientes: '' })
   const [createImage, setCreateImage] = useState(null)
@@ -41,19 +46,36 @@ export default function ProductosPage() {
             if (categoriaId) params.set('idCategoria', categoriaId)
             return api.get(`/productos/buscar?${params.toString()}`)
           }
-          return api.get('/productos')
+          // Paginado y ordenado
+          return api.get('/productos', { params: { page, size, sort } })
         })()
       ])
       setCategorias(cats.data)
-      setProductos(prods.data)
+      if (q || categoriaId) {
+        setProductos(prods.data)
+        setTotalPages(1)
+        setTotalElements(prods.data?.length || 0)
+      } else {
+        const pg = prods.data
+        if (Array.isArray(pg)) {
+          // Fallback: si el backend devuelve lista (no Page)
+          setProductos(pg)
+          setTotalPages(1)
+          setTotalElements(pg.length)
+        } else {
+          setProductos(pg?.content || [])
+          setTotalPages(pg?.totalPages || 0)
+          setTotalElements(pg?.totalElements || 0)
+        }
+      }
     } catch (e) {
-      setError('Error cargando productos')
+      setError('No pudimos cargar los productos. Verifica que el backend esté en ejecución y la base de datos disponible.')
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { cargar() }, [q, categoriaId])
+  useEffect(() => { cargar() }, [q, categoriaId, page, size, sort])
 
   const crear = async (e) => {
     e.preventDefault()
@@ -127,6 +149,19 @@ export default function ProductosPage() {
     }
   }
 
+  const restaurar = async (id) => {
+    setLoading(true)
+    try {
+      await api.post(`/productos/${id}/restaurar`)
+      cargar()
+    } catch (e) {
+      const resp = e?.response?.data
+      setError(resp?.errores ? resp.errores.join(', ') : (resp?.mensaje || 'Error restaurando producto'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const subirImagen = async (id, file) => {
     if (!file) return
     if (!file.type?.startsWith('image/')) {
@@ -173,6 +208,7 @@ export default function ProductosPage() {
       <div className="grid">
         <div className="card table-card" ref={listRef}>
           <h3 className="m-0">Listado</h3>
+          {error && <div className="alert alert-danger mt-2" role="alert">{error} <button className="btn btn-sm btn-light ms-2" onClick={()=>cargar()}>Reintentar</button></div>}
           {loading ? <p>Cargando...</p> : (
             <div className="table-responsive table-viewport" style={{overflowX:'auto'}}>
             <table className="table align-middle">
@@ -199,14 +235,18 @@ export default function ProductosPage() {
                         {(p.ingredientes || '').length > 80 ? (p.ingredientes || '').slice(0,80) + '…' : (p.ingredientes || '')}
                       </div>
                     </td>
-                    <td>${p.precio}</td>
+                    <td>{new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(Number(p.precio)||0)}</td>
                     <td>{p.stock}</td>
                     <td>
-                      {p.imagenUrl ? (
-                        <img alt={p.nombre} src={baseURL + p.imagenUrl} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />
-                      ) : (
-                        <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && subirImagen(p.idProducto, e.target.files[0])} />
-                      )}
+                      <div className="d-flex align-items-center gap-2">
+                        {p.imagenUrl && (
+                          <img alt={p.nombre} src={baseURL + p.imagenUrl} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />
+                        )}
+                        <label className="btn btn-sm btn-outline-secondary m-0">
+                          {p.imagenUrl ? 'Cambiar' : 'Subir'}
+                          <input type="file" accept="image/*" style={{display:'none'}} onChange={(e) => e.target.files?.[0] && subirImagen(p.idProducto, e.target.files[0])} />
+                        </label>
+                      </div>
                     </td>
                     <td className="d-flex gap-2">
                       <button className="btn btn-primary" onClick={() => {
@@ -222,11 +262,40 @@ export default function ProductosPage() {
                         setShowEdit(true)
                       }}>Editar</button>
                       {p.estado === 'disponible' && <button className="btn btn-danger" onClick={() => inhabilitar(p.idProducto)}>Inhabilitar</button>}
+                      {p.estado === 'agotado' && <button className="btn btn-success" onClick={() => restaurar(p.idProducto)}>Restaurar</button>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {!q && !categoriaId && (
+              <div className="d-flex justify-content-between align-items-center mt-2">
+                <div className="d-flex align-items-center gap-2">
+                  <label className="small">Tamaño
+                    <select className="form-select form-select-sm d-inline-block ms-1" style={{width: 'auto'}} value={size} onChange={(e)=>{ setPage(0); setSize(Number(e.target.value)) }}>
+                      {[5,10,20,50].map(n=> <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </label>
+                  <label className="small">Ordenar por
+                    <select className="form-select form-select-sm d-inline-block ms-1" style={{width: 'auto'}} value={sort} onChange={(e)=>{ setPage(0); setSort(e.target.value) }}>
+                      <option value="idProducto,desc">ID desc</option>
+                      <option value="idProducto,asc">ID asc</option>
+                      <option value="nombre,asc">Nombre A-Z</option>
+                      <option value="nombre,desc">Nombre Z-A</option>
+                      <option value="precio,asc">Precio menor</option>
+                      <option value="precio,desc">Precio mayor</option>
+                      <option value="stock,asc">Stock menor</option>
+                      <option value="stock,desc">Stock mayor</option>
+                    </select>
+                  </label>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <button className="btn btn-outline-secondary btn-sm" disabled={page<=0} onClick={()=> setPage(p=>Math.max(0,p-1))}>Anterior</button>
+                  <span className="small">Página {totalPages? (page+1): 0} de {totalPages}</span>
+                  <button className="btn btn-outline-secondary btn-sm" disabled={page+1>=totalPages} onClick={()=> setPage(p=>p+1)}>Siguiente</button>
+                </div>
+              </div>
+            )}
             </div>
           )}
         </div>

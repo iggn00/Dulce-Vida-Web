@@ -24,10 +24,7 @@ public class RecursosEstaticosConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(@NonNull ViewControllerRegistry registry) {
-        // Fallback SPA: reenviar rutas de la app al index.html
-        // 1) Raíz
         registry.addViewController("/").setViewName("forward:/index.html");
-        // 2) Rutas sin punto (no archivos) - mantiene compatibilidad con rutas internas
         registry.addViewController("/{path:[^\\.]*}").setViewName("forward:/index.html");
     }
 }

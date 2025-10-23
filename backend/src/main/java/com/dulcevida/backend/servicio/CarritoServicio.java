@@ -107,4 +107,28 @@ public class CarritoServicio {
         detallePedidoRepositorio.deleteAll(detalles);
         return obtenerCarrito(session);
     }
+
+    public Map<String, Object> finalizar(HttpSession session) {
+        Cliente cli = clienteDeSesion(session);
+        Pedido pedido = carritoDe(cli);
+        List<DetallePedido> detalles = detallePedidoRepositorio.findByPedido(pedido);
+        if (detalles.isEmpty()) {
+            throw new IllegalArgumentException("El carrito está vacío");
+        }
+        // Recalcular total por seguridad
+        BigDecimal total = detalles.stream()
+                .map(d -> d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        pedido.setTotal(total);
+        pedido.setEstado("en_preparacion");
+        pedidoRepositorio.save(pedido);
+
+        // Al consultar nuevamente el carrito se creará uno nuevo (pendiente) si se necesita
+        return Map.of(
+                "pedidoId", pedido.getIdPedido(),
+                "estado", pedido.getEstado(),
+                "total", total,
+                "items", detalles.size()
+        );
+    }
 }

@@ -1,7 +1,6 @@
 import { Routes, Route, Outlet, Navigate, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
-import './App.css'
 import ProductosPage from './pages/ProductosPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
@@ -63,6 +62,7 @@ export default function App() {
         {/* Panel de administración FULL (sin Navbar/Footer públicos) */}
         <Route path="/admin" element={<ProtectedRoute requiredRoles={["ADMINISTRADOR"]} />}> 
           <Route element={<AdminLayoutShell title="Panel" />}> 
+            <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="usuarios" element={<UsuariosPage />} />
             <Route path="productos" element={<AdminProductosPage />} />

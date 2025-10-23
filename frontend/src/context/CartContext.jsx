@@ -55,9 +55,19 @@ export function CartProvider({ children }) {
       mapServerCart(data)
     } catch {}
   }
-  const count = items.length
+  const checkout = async () => {
+    try {
+      const { data } = await api.post('/cart/checkout', {}, { withCredentials: true })
+      // Tras finalizar, el carrito debería quedar vacío; refrescamos estado
+      await refresh()
+      return data
+    } catch (e) {
+      throw e
+    }
+  }
+  const count = items.reduce((acc, it) => acc + (Number(it.cantidad) || 0), 0)
 
-  const value = useMemo(() => ({ items, addItem, removeItem, clear, count, total, refresh }), [items, count, total])
+  const value = useMemo(() => ({ items, addItem, removeItem, clear, checkout, count, total, refresh }), [items, count, total])
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 

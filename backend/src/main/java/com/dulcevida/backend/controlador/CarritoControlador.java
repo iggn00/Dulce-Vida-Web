@@ -51,4 +51,15 @@ public class CarritoControlador {
             return ResponseEntity.status(401).body(Map.of("error", "Usuario no autenticado"));
         }
     }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<?> checkout(HttpSession session) {
+        try {
+            return ResponseEntity.ok(carritoServicio.finalizar(session));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Usuario no autenticado"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

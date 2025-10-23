@@ -30,9 +30,12 @@ export default function DashboardPage() {
 
   return (
     <div className="page">
-      <h2>Dashboard</h2>
       {loading ? (
-        <p>Cargando...</p>
+        <div className="grid">
+          <div className="card stat skeleton" style={{height:96}}/>
+          <div className="card stat skeleton" style={{height:96}}/>
+          <div className="card skeleton" style={{height:220}}/>
+        </div>
       ) : (
         <div className="grid">
           <div className="card stat">
@@ -44,12 +47,22 @@ export default function DashboardPage() {
             <p className="big">{productos}</p>
           </div>
           <div className="card">
-            <h3>Productos con bajo stock</h3>
-            <ul>
-              {bajoStock.map((p) => (
-                <li key={p.idProducto}>{p.nombre} — stock: {p.stock}</li>
-              ))}
-            </ul>
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <h3 className="m-0">Productos con bajo stock</h3>
+              <span className="badge-soft">Umbral ≤ 5</span>
+            </div>
+            {bajoStock.length === 0 ? (
+              <div className="text-muted">No hay productos con bajo stock 🎉</div>
+            ) : (
+              <ul className="list-group list-group-flush small">
+                {bajoStock.map((p) => (
+                  <li key={p.idProducto} className="list-group-item d-flex justify-content-between align-items-center">
+                    <span className="text-truncate" style={{maxWidth:'70%'}}>{p.nombre}</span>
+                    <span className="badge-soft">{p.stock} unidades</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       )}

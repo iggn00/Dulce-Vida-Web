@@ -2,6 +2,15 @@ import { useCart } from '../context/CartContext.jsx'
 
 export default function CartPage() {
   const { items, total, removeItem, clear } = useCart()
+  const pagar = async () => {
+    // Simula pago: muestra mensaje y limpia carrito (backend + frontend)
+    try {
+      alert('Pago simulado con éxito. ¡Gracias por tu compra!')
+      await clear()
+    } catch (e) {
+      console.error(e)
+    }
+  }
   return (
     <div className="page page-cart">
       <h1 className="h4 mb-3">Carrito</h1>
@@ -38,7 +47,7 @@ export default function CartPage() {
               <div className="card-body">
                 <div className="d-flex justify-content-between mb-2"><span>Total</span><strong>{new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(total)}</strong></div>
                 <div className="d-flex gap-2">
-                  <button className="btn btn-success w-100" id="btn-pagar" type="button">Pagar</button>
+                  <button className="btn btn-success w-100" id="btn-pagar" type="button" onClick={pagar}>Pagar</button>
                   <button className="btn btn-outline-secondary" type="button" onClick={clear}>Vaciar</button>
                 </div>
               </div>

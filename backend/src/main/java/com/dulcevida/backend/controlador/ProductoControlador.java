@@ -41,15 +41,11 @@ public class ProductoControlador {
     @Value("${app.uploads.dir:uploads/imagenes_productos}")
     private String directorioUploads;
 
-    @Value("${app.admin.email:admin@dulcevida.cl}")
-    private String adminEmailPermitido;
-
     private boolean esAdminPermitido(HttpSession session){
         Object id = session.getAttribute("usuarioId");
         if (id == null) return false;
     return usuarioServicio.buscarPorId((Integer) id)
-        .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR")
-            || (u.getEmail() != null && u.getEmail().equalsIgnoreCase(adminEmailPermitido)))
+        .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR"))
         .orElse(false);
     }
 

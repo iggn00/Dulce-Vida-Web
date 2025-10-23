@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Footer() {
+  const { user, logout } = useAuth()
   return (
     <div className="container-fluid bg-cacao text-crema">
       <footer className="py-4">
@@ -20,8 +22,17 @@ export default function Footer() {
                 <li><Link className="enlace-pie" to="/productos">Productos</Link></li>
                 <li><Link className="enlace-pie" to="/nosotros">Nosotros</Link></li>
                 <li><Link className="enlace-pie" to="/contacto">Contacto</Link></li>
-                <li><Link className="enlace-pie" to="/login">Iniciar sesión</Link></li>
-                <li><Link className="enlace-pie" to="/register">Registrar usuario</Link></li>
+                {user ? (
+                  <>
+                    <li><Link className="enlace-pie" to={user.rol === 'ADMINISTRADOR' ? '/admin/dashboard' : '/'}>Mi cuenta</Link></li>
+                    <li><button className="enlace-pie btn btn-link p-0 align-baseline" onClick={logout}>Cerrar sesión</button></li>
+                  </>
+                ) : (
+                  <>
+                    <li><Link className="enlace-pie" to="/login">Iniciar sesión</Link></li>
+                    <li><Link className="enlace-pie" to="/register">Registrar usuario</Link></li>
+                  </>
+                )}
               </ul>
             </div>
             <div className="col-12 col-md-3">

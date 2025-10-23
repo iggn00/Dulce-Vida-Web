@@ -1,9 +1,11 @@
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\config\CorsConfig.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\config\GlobalExceptionHandler.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\config\RecursosEstaticosConfig.java
+C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\config\SecurityConfig.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\configuracion\SeguridadConfig.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\configuracion\SwaggerConfig.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\controlador\AutenticacionControlador.java
+C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\controlador\AuthControlador.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\controlador\CarritoControlador.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\controlador\CategoriaControlador.java
 C:\Users\yvl\Documents\GitHub\Dulce-Vida-Web\backend\src\main\java\com\dulcevida\backend\controlador\ContactoControlador.java

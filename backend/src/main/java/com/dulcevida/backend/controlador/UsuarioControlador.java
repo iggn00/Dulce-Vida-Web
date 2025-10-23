@@ -21,9 +21,6 @@ public class UsuarioControlador {
     @Autowired
     private UsuarioServicio usuarioServicio;
 
-    @org.springframework.beans.factory.annotation.Value("${app.admin.email:admin@dulcevida.cl}")
-    private String adminEmailPermitido;
-
     @org.springframework.beans.factory.annotation.Value("${app.registration.allowAdmin:false}")
     private boolean registroPermiteAdmin;
 
@@ -31,25 +28,27 @@ public class UsuarioControlador {
         Object id = session.getAttribute("usuarioId");
         if (id == null) return false;
     return usuarioServicio.buscarPorId((Integer) id)
-        .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR")
-            || (u.getEmail() != null && u.getEmail().equalsIgnoreCase(adminEmailPermitido)))
+        .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR"))
         .orElse(false);
     }
 
     @GetMapping
-    public List<Usuario> listar() {
-        return usuarioServicio.listar();
+    public ResponseEntity<?> listar(HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+        return ResponseEntity.ok(usuarioServicio.listar());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detalle(@PathVariable Integer id) {
+    public ResponseEntity<?> detalle(@PathVariable Integer id, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
         Optional<Usuario> opt = usuarioServicio.buscarPorId(id);
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/buscar")
-    public List<Usuario> buscar(@RequestParam("q") @NotBlank String texto) {
-        return usuarioServicio.buscarPorTexto(texto);
+    public ResponseEntity<?> buscar(@RequestParam("q") @NotBlank String texto, HttpSession session) {
+        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+        return ResponseEntity.ok(usuarioServicio.buscarPorTexto(texto));
     }
 
     @PostMapping

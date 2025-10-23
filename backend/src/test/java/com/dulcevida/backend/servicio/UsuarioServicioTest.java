@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
-// Sin cifrado: pruebas con texto plano
 
 import java.util.Optional;
 
@@ -42,6 +41,7 @@ public class UsuarioServicioTest {
         usuario.setEmail("admin@dulcevida.com");
         usuario.setPassword("admin123");
         usuario.setRol("ADMINISTRADOR");
+        usuario.setEstado("activo");
     }
 
     @Test
@@ -78,7 +78,6 @@ public class UsuarioServicioTest {
         otro.setEmail("nuevo@dulcevida.com");
         Usuario cambios = new Usuario();
         cambios.setEmail("nuevo@dulcevida.com");
-        when(usuarioRepositorio.findById(1)).thenReturn(Optional.of(usuario));
         when(usuarioRepositorio.findByEmail("nuevo@dulcevida.com")).thenReturn(Optional.of(otro));
         assertThrows(DuplicateKeyException.class, () -> usuarioServicio.actualizar(1, cambios));
     }

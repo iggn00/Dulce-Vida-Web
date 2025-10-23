@@ -16,6 +16,7 @@ public class UsuarioServicio {
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
 
+
     public List<Usuario> listar() {
         return usuarioRepositorio.findAll();
     }
@@ -37,7 +38,15 @@ public class UsuarioServicio {
         if (usuarioRepositorio.findByEmail(usuario.getEmail()).isPresent()) {
             throw new DuplicateKeyException("El email ya está registrado");
         }
-        // Almacenar la contraseña en texto plano (temporalmente, sin cifrar)
+        // Establecer rol por defecto si no viene
+        if (usuario.getRol() == null || usuario.getRol().isBlank()) {
+            usuario.setRol("USUARIO");
+        }
+        // Establecer estado por defecto
+        if (usuario.getEstado() == null || usuario.getEstado().isBlank()) {
+            usuario.setEstado("activo");
+        }
+        // Guardar contraseña en texto plano (sin cifrar)
         usuario.setPassword(usuario.getPassword());
         usuarioRepositorio.save(usuario);
         return usuario;
@@ -57,6 +66,9 @@ public class UsuarioServicio {
             if (cambios.getPassword() != null && !cambios.getPassword().isBlank()) {
                 // Actualizar en texto plano (sin cifrar)
                 u.setPassword(cambios.getPassword());
+            }
+            if (cambios.getEstado() != null && !cambios.getEstado().isBlank()) {
+                u.setEstado(cambios.getEstado());
             }
             u.setRol(cambios.getRol());
             usuarioRepositorio.save(u);

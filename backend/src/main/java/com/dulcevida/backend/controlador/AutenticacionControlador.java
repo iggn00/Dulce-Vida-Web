@@ -18,12 +18,13 @@ public class AutenticacionControlador {
     @Autowired
     private UsuarioServicio usuarioServicio;
 
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales, HttpSession session) {
         String email = credenciales.get("email");
         String password = credenciales.get("password");
         Optional<Usuario> opt = usuarioServicio.buscarPorEmail(email);
-        if (opt.isPresent() && password != null && password.equals(opt.get().getPassword())) {
+    if (opt.isPresent() && password != null && password.equals(opt.get().getPassword())) {
             Usuario u = opt.get();
             // Crear sesión simple sin JWT
             session.setAttribute("usuarioId", u.getIdUsuario());

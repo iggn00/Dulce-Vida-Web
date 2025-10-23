@@ -37,4 +37,8 @@ public class Usuario {
     @NotBlank
     @Pattern(regexp = "ADMINISTRADOR|USUARIO", message = "El rol debe ser ADMINISTRADOR o USUARIO")
     private String rol; 
+
+    @NotBlank
+    @Pattern(regexp = "activo|inactivo", message = "El estado debe ser 'activo' o 'inactivo'")
+    private String estado = "activo";
 }

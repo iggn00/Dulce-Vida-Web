@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { api } from '../services/http'
+import { register as registerService } from '../services/auth'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ nombre: '', email: '', password: '', rol: 'USUARIO' })
@@ -11,9 +11,9 @@ export default function RegisterPage() {
     e.preventDefault()
     setError(''); setMsg(''); setLoading(true)
     try {
-      await api.post('/usuarios', form)
-      setMsg('Usuario creado correctamente.')
-      setForm({ nombre: '', email: '', password: '', rol: 'ADMINISTRADOR' })
+      await registerService(form.nombre, form.email, form.password, form.rol)
+      setMsg('Usuario creado correctamente. Ya puedes iniciar sesión.')
+      setForm({ nombre: '', email: '', password: '', rol: 'USUARIO' })
     } catch (e) {
       const resp = e?.response?.data
       setError(resp?.errores ? resp.errores.join(', ') : (resp?.mensaje || 'Error creando usuario'))
@@ -32,7 +32,7 @@ export default function RegisterPage() {
           <div className="mb-3"><label className="form-label">Nombre</label><input className="form-control" value={form.nombre} onChange={(e)=>setForm({...form, nombre: e.target.value})} required /></div>
           <div className="mb-3"><label className="form-label">Email</label><input type="email" className="form-control" value={form.email} onChange={(e)=>setForm({...form, email: e.target.value})} required /></div>
           <div className="mb-3"><label className="form-label">Contraseña</label><input type="password" className="form-control" value={form.password} onChange={(e)=>setForm({...form, password: e.target.value})} required minLength={8} /></div>
-          <div className="mb-3"><label className="form-label">Rol</label><select className="form-select" value={form.rol} onChange={(e)=>setForm({...form, rol: e.target.value})}><option>USUARIO</option><option>ADMINISTRADOR</option></select></div>
+          <div className="mb-3"><label className="form-label">Rol</label><select className="form-select" value={form.rol} onChange={(e)=>setForm({...form, rol: e.target.value})}><option value="USUARIO">USUARIO</option><option value="ADMINISTRADOR">ADMINISTRADOR</option></select></div>
           <div className="d-flex justify-content-end gap-2"><button className="btn btn-dorado" type="submit" disabled={loading}>Registrar</button></div>
         </form>
       </div>

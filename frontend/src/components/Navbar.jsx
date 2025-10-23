@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Navbar() {
   const { count } = useCart()
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const firstName = (user?.nombre || '').split(' ')[0]
   return (
     <nav className="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
       <div className="container">
@@ -40,13 +41,38 @@ export default function Navbar() {
               </li>
             )}
           </ul>
-          <div className="d-flex gap-2 mt-3 mt-md-0">
-            <Link to="/login" className="btn btn-outline-light rounded-pill shadow-sm px-3">Iniciar sesión</Link>
-            <Link to="/register" className="btn btn-dorado rounded-pill shadow-sm px-3">Registrar usuario</Link>
+          <div className="d-flex align-items-center gap-2 mt-3 mt-md-0">
+            {user ? (
+              <>
+                <div className="text-light small d-none d-sm-block me-1" title={user.email}>
+                  Hola, <strong>{firstName || 'usuario'}</strong>
+                </div>
+                <Link
+                  to={user.rol === 'ADMINISTRADOR' ? '/admin/dashboard' : '/'}
+                  className="btn btn-outline-light rounded-pill shadow-sm px-3"
+                >
+                  Perfil
+                </Link>
+                <button
+                  type="button"
+                  className="btn btn-outline-light rounded-pill shadow-sm px-3"
+                  onClick={logout}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-outline-light rounded-pill shadow-sm px-3">Iniciar sesión</Link>
+                <Link to="/register" className="btn btn-dorado rounded-pill shadow-sm px-3">Registrar usuario</Link>
+              </>
+            )}
             <Link to="/carrito" className="btn btn-outline-light rounded-pill shadow-sm px-3 position-relative" aria-label="Carrito de compras">
               <span className="me-1">🛒</span>
               <span>Carrito</span>
-              <span id="cart-count" className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{count}</span>
+              {count > 0 && (
+                <span id="cart-count" className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{count}</span>
+              )}
             </Link>
           </div>
         </div>

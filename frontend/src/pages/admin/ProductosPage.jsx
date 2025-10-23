@@ -117,8 +117,6 @@ export default function ProductosPage() {
 
   return (
     <div className="page">
-      <h2>Gestión de Productos</h2>
-
       <div className="toolbar">
         <input placeholder="Buscar por nombre" value={q} onChange={(e) => setQ(e.target.value)} />
         <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
@@ -130,10 +128,10 @@ export default function ProductosPage() {
       <div className="grid">
         <div className="card">
           <div className="d-flex justify-content-between align-items-center">
-            <h3>{editId ? 'Editar producto' : 'Crear producto'}</h3>
+            <h3 className="m-0">{editId ? 'Editar producto' : 'Crear producto'}</h3>
             {editId && <button className="btn" type="button" onClick={()=>{ setEditId(null); setForm({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '', ingredientes: '' }) }}>Cancelar edición</button>}
           </div>
-          <form onSubmit={crear} className="form-grid">
+          <form onSubmit={crear} className="form-grid mt-2">
             <label>Nombre<input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required /></label>
             <label>Descripción<textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} required /></label>
             <label>Ingredientes<textarea value={form.ingredientes} onChange={(e) => setForm({ ...form, ingredientes: e.target.value })} placeholder="Ej: Harina, huevos, chocolate..." /></label>
@@ -151,7 +149,7 @@ export default function ProductosPage() {
         </div>
 
         <div className="card">
-          <h3>Listado</h3>
+          <h3 className="m-0">Listado</h3>
           {loading ? <p>Cargando...</p> : (
             <div className="table-responsive">
             <table className="table align-middle">
@@ -182,7 +180,7 @@ export default function ProductosPage() {
                     <td>{p.stock}</td>
                     <td>
                       {p.imagenUrl ? (
-                        <img alt={p.nombre} src={baseURL + p.imagenUrl} style={{ width: 60, height: 60, objectFit: 'cover' }} />
+                        <img alt={p.nombre} src={baseURL + p.imagenUrl} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />
                       ) : (
                         <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && subirImagen(p.idProducto, e.target.files[0])} />
                       )}

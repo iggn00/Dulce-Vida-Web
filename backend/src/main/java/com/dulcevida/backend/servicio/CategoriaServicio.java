@@ -27,4 +27,19 @@ public class CategoriaServicio {
         Categoria c = categoriaRepositorio.findByNombreIgnoreCase(nombre);
         return Optional.ofNullable(c);
     }
+
+    public Categoria crear(Categoria categoria) {
+        return categoriaRepositorio.save(categoria);
+    }
+
+    public Optional<Categoria> actualizar(Integer id, Categoria cambios) {
+        return categoriaRepositorio.findById(Objects.requireNonNull(id)).map(c -> {
+            c.setNombre(cambios.getNombre());
+            return categoriaRepositorio.save(c);
+        });
+    }
+
+    public void eliminar(Integer id) {
+        categoriaRepositorio.deleteById(Objects.requireNonNull(id));
+    }
 }

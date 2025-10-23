@@ -90,13 +90,17 @@ public class CarritoServicio {
             it.put("idDetalle", d.getIdDetalle());
             it.put("cantidad", d.getCantidad());
             it.put("precioUnitario", d.getPrecioUnitario());
-            it.put("producto", Map.of(
-                    "idProducto", p.getIdProducto(),
-                    "nombre", p.getNombre(),
-                    "descripcion", p.getDescripcion(),
-                    "imagenUrl", p.getImagenUrl(),
-                    "precio", p.getPrecio(),
-                    "stock", Optional.ofNullable(p.getStock()).orElse(0)));
+            // Map.of no admite valores null; usamos HashMap para permitir imagenUrl/descripcion nulos
+            Map<String, Object> pMap = new HashMap<>();
+            if (p != null) {
+                pMap.put("idProducto", p.getIdProducto());
+                pMap.put("nombre", p.getNombre());
+                pMap.put("descripcion", p.getDescripcion());
+                pMap.put("imagenUrl", p.getImagenUrl());
+                pMap.put("precio", p.getPrecio());
+                pMap.put("stock", Optional.ofNullable(p.getStock()).orElse(0));
+            }
+            it.put("producto", pMap);
             items.add(it);
             cantidadTotal += Optional.ofNullable(d.getCantidad()).orElse(0);
         }

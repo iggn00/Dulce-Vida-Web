@@ -27,7 +27,10 @@ public class AuthControlador {
         if (opt.isPresent() && password != null) {
             Usuario u = opt.get();
             if (!"activo".equalsIgnoreCase(u.getEstado())) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("exito", false, "mensaje", "Usuario inactivo"));
+                return ResponseEntity.status(HttpStatus.LOCKED).body(Map.of(
+                        "exito", false,
+                        "codigo", "cuenta_inactiva",
+                        "mensaje", "Tu cuenta ha sido inhabilitada, Contacta al Administrador."));
             }
             // Validar contraseña en texto plano (sin cifrar)
             if (password.equals(u.getPassword())) {
@@ -38,11 +41,11 @@ public class AuthControlador {
                         "id_usuario", u.getIdUsuario(),
                         "nombre", u.getNombre(),
                         "email", u.getEmail(),
-                        "rol", u.getRol()
-                ));
+                        "rol", u.getRol()));
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("exito", false, "mensaje", "Credenciales inválidas"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("exito", false, "mensaje", "Credenciales inválidas"));
     }
 
     @PostMapping("/register")
@@ -58,23 +61,23 @@ public class AuthControlador {
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id_usuario", creado.getIdUsuario(),
                 "email", creado.getEmail(),
-                "rol", creado.getRol()
-        ));
+                "rol", creado.getRol()));
     }
 
     @GetMapping("/session")
     public ResponseEntity<?> session(HttpSession session) {
         Object id = session.getAttribute("usuarioId");
-        if (id == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (id == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         Optional<Usuario> opt = usuarioServicio.buscarPorId((Integer) id);
-        if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (opt.isEmpty())
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         Usuario u = opt.get();
         return ResponseEntity.ok(Map.of(
                 "id_usuario", u.getIdUsuario(),
                 "nombre", u.getNombre(),
                 "email", u.getEmail(),
-                "rol", u.getRol()
-        ));
+                "rol", u.getRol()));
     }
 
     @PostMapping("/logout")

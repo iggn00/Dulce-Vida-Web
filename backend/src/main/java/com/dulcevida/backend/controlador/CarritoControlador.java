@@ -43,6 +43,16 @@ public class CarritoControlador {
         }
     }
 
+    @PatchMapping("/item/{idDetalle}")
+    public ResponseEntity<?> actualizarCantidad(@PathVariable Integer idDetalle, @RequestBody Map<String,Integer> body, HttpSession session){
+        try {
+            Integer cantidad = body != null ? body.get("cantidad") : null;
+            return ResponseEntity.ok(carritoServicio.actualizarCantidad(session, idDetalle, cantidad));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Usuario no autenticado"));
+        }
+    }
+
     @DeleteMapping("/clear")
     public ResponseEntity<?> limpiar(HttpSession session){
         try {

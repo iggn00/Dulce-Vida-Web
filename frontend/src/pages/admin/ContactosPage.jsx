@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../../services/http.js'
+import Modal from '../../components/admin/Modal.jsx'
 
 export default function ContactosPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
+  const [selected, setSelected] = useState(null)
 
   useEffect(() => {
     let alive = true
@@ -61,6 +63,7 @@ export default function ContactosPage() {
                 <th>Asunto</th>
                 <th>Mensaje</th>
                 <th>Fecha</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -74,15 +77,46 @@ export default function ContactosPage() {
                     <div className="text-truncate" title={c.mensaje}>{c.mensaje}</div>
                   </td>
                   <td>{c.fechaEnvio ? new Date(c.fechaEnvio).toLocaleString() : '-'}</td>
+                  <td className="text-end"><button className="btn btn-outline-secondary btn-sm" onClick={()=> setSelected(c)}>Ver</button></td>
                 </tr>
               ))}
               {list.length === 0 && (
-                <tr><td colSpan={6} className="text-muted">Sin resultados</td></tr>
+                <tr><td colSpan={7} className="text-muted">Sin resultados</td></tr>
               )}
             </tbody>
           </table>
         </div>
       )}
+
+      <Modal
+        open={!!selected}
+        onClose={()=> setSelected(null)}
+        title={selected ? `Mensaje de ${selected.nombre}` : 'Mensaje'}
+        footer={selected && (
+          <>
+            <a className="btn" href={`mailto:${encodeURIComponent(selected.email)}?subject=${encodeURIComponent(selected.asunto || 'Consulta')}&body=${encodeURIComponent(`Hola ${selected.nombre || ''}\n\nEn respuesta a tu mensaje:\n"${selected.mensaje || ''}"`)}`}>Responder por email</a>
+            <button className="btn" type="button" onClick={() => { navigator.clipboard?.writeText(selected.email) }}>Copiar email</button>
+            <button className="btn btn-primary" type="button" onClick={()=> setSelected(null)}>Cerrar</button>
+          </>
+        )}
+      >
+        {selected && (
+          <div className="card admin-animate-in">
+            <div className="card-body">
+              <div className="d-flex flex-column gap-2">
+                <div><strong>Nombre:</strong> {selected.nombre || '-'}</div>
+                <div><strong>Email:</strong> <a href={`mailto:${selected.email}`}>{selected.email}</a></div>
+                {selected.asunto && <div><strong>Asunto:</strong> {selected.asunto}</div>}
+                <div>
+                  <strong>Mensaje:</strong>
+                  <div className="mt-1" style={{whiteSpace:'pre-wrap'}}>{selected.mensaje}</div>
+                </div>
+                {selected.fechaEnvio && <div className="text-muted small">Enviado: {new Date(selected.fechaEnvio).toLocaleString()}</div>}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

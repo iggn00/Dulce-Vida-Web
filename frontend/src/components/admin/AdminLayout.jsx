@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 
 export default function AdminLayout({ title }) {
@@ -41,7 +41,9 @@ export default function AdminLayout({ title }) {
         onMouseLeave={() => setHovering(false)}
       >
         <div className="admin-brand">
-          <img src="/img/misc/logo.png" alt="Dulce Vida" height="28" onError={(e)=>{ e.currentTarget.remove() }} />
+          <Link to="/" title="Ir al inicio" className="brand-home">
+            <img src="/img/misc/logo.png" alt="Dulce Vida" height="28" onError={(e)=>{ e.currentTarget.remove() }} />
+          </Link>
           <span className="brand-text">Panel</span>
         </div>
         <nav className="admin-nav">
@@ -88,7 +90,8 @@ export default function AdminLayout({ title }) {
               <h1 className="page-title m-0">{titleFor(location, title)}</h1>
             </div>
           </div>
-          <div className="right">
+          <div className="right d-flex align-items-center gap-2">
+            <NavLink to="/" className="btn btn-light" title="Volver al inicio">🏠 Inicio</NavLink>
             {user && (
               <div className="userpill d-none d-sm-flex" title={user.email}>
                 <span className="avatar" aria-hidden>{initials}</span>

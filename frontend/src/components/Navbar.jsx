@@ -47,12 +47,6 @@ export default function Navbar() {
                 <div className="text-light small d-none d-sm-block me-1" title={user.email}>
                   Hola, <strong>{firstName || 'usuario'}</strong>
                 </div>
-                <Link
-                  to={user.rol === 'ADMINISTRADOR' ? '/admin/dashboard' : '/'}
-                  className="btn btn-outline-light rounded-pill shadow-sm px-3"
-                >
-                  Perfil
-                </Link>
                 <button
                   type="button"
                   className="btn btn-outline-light rounded-pill shadow-sm px-3"

@@ -1,4 +1,4 @@
-export default function ProductCard({ product, onAdd, onViewDetail }) {
+export default function ProductCard({ product, onAdd, onViewDetail, disabledAdd = false }) {
   const priceText = new Intl.NumberFormat('es-CL', {
     style: 'currency', currency: 'CLP', minimumFractionDigits: 0, maximumFractionDigits: 0
   }).format(product.price || 0)
@@ -28,8 +28,9 @@ export default function ProductCard({ product, onAdd, onViewDetail }) {
                 e.stopPropagation()
                 onAdd?.(product)
               }}
+              disabled={disabledAdd}
             >
-              Añadir
+              {disabledAdd ? 'Límite' : 'Añadir'}
             </button>
           </div>
         </div>

@@ -12,8 +12,8 @@ export default function ProductosPage() {
   const [sort, setSort] = useState('idProducto,desc')
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
-  const [form, setForm] = useState({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '', ingredientes: '' })
-  const [formCreate, setFormCreate] = useState({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: '', ingredientes: '' })
+  const [form, setForm] = useState({ nombre: '', descripcion: '', precio: '1000', stock: '10', idCategoria: '', ingredientes: '', estado: 'disponible' })
+  const [formCreate, setFormCreate] = useState({ nombre: '', descripcion: '', precio: '1000', stock: '10', idCategoria: '', ingredientes: '', estado: 'disponible' })
   const [createImage, setCreateImage] = useState(null)
   const [editId, setEditId] = useState(null)
   const [showEdit, setShowEdit] = useState(false)
@@ -88,7 +88,7 @@ export default function ProductosPage() {
       return
     }
     try {
-      const payload = { ...formCreate, categoria: { idCategoria: Number(formCreate.idCategoria) } }
+  const payload = { ...formCreate, precio: Number(formCreate.precio), stock: Number(formCreate.stock), categoria: { idCategoria: Number(formCreate.idCategoria) } }
       const resp = await api.post('/productos', payload)
       const created = resp?.data
       const newId = created?.idProducto
@@ -97,7 +97,7 @@ export default function ProductosPage() {
         fd.append('archivo', createImage)
         await api.post(`/productos/${newId}/imagen`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       }
-      setFormCreate({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: categorias[0]?.idCategoria ? String(categorias[0].idCategoria) : '', ingredientes: '' })
+  setFormCreate({ nombre: '', descripcion: '', precio: '1000', stock: '10', idCategoria: categorias[0]?.idCategoria ? String(categorias[0].idCategoria) : '', ingredientes: '' })
       setCreateImage(null)
       setShowCreate(false)
       cargar()
@@ -122,7 +122,7 @@ export default function ProductosPage() {
       return
     }
     try {
-      const payload = { ...form, categoria: { idCategoria: Number(form.idCategoria) } }
+  const payload = { ...form, precio: Number(form.precio), stock: Number(form.stock), categoria: { idCategoria: Number(form.idCategoria) } }
       await api.put(`/productos/${editId}`, payload)
       setEditId(null)
       setShowEdit(false)
@@ -168,8 +168,8 @@ export default function ProductosPage() {
       setError('El archivo debe ser una imagen')
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('La imagen no debe superar 5MB')
+    if (file.size > 10 * 1024 * 1024) {
+      setError('La imagen no debe superar 10MB')
       return
     }
     const fd = new FormData()
@@ -192,7 +192,7 @@ export default function ProductosPage() {
         <div style={{display:'flex',gap:'.5rem',flexWrap:'wrap'}}>
           <button className="btn btn-primary" type="button" onClick={()=>{
             const defaultCat = categorias[0]?.idCategoria ? String(categorias[0].idCategoria) : ''
-            setFormCreate({ nombre: '', descripcion: '', precio: 1000, stock: 10, idCategoria: defaultCat, ingredientes: '' })
+            setFormCreate({ nombre: '', descripcion: '', precio: '1000', stock: '10', idCategoria: defaultCat, ingredientes: '', estado: 'disponible' })
             setCreateImage(null)
             setShowCreate(true)
           }}>+ Crear producto</button>
@@ -255,14 +255,28 @@ export default function ProductosPage() {
                           nombre: p.nombre || '',
                           descripcion: p.descripcion || '',
                           ingredientes: p.ingredientes || '',
-                          precio: Number(p.precio) || 0,
-                          stock: Number(p.stock) || 0,
-                          idCategoria: p.categoria?.idCategoria ? String(p.categoria.idCategoria) : ''
+                          precio: p.precio != null ? String(p.precio) : '',
+                          stock: p.stock != null ? String(p.stock) : '',
+                          idCategoria: p.categoria?.idCategoria ? String(p.categoria.idCategoria) : '',
+                          estado: p.estado || 'disponible'
                         })
                         setShowEdit(true)
                       }}>Editar</button>
                       {p.estado === 'disponible' && <button className="btn btn-danger" onClick={() => inhabilitar(p.idProducto)}>Inhabilitar</button>}
-                      {p.estado === 'agotado' && <button className="btn btn-success" onClick={() => restaurar(p.idProducto)}>Restaurar</button>}
+                      {p.estado === 'agotado' && <button className="btn btn-success" onClick={() => restaurar(p.idProducto)}>Habilitar</button>}
+                      <button className="btn btn-outline-danger" onClick={async () => {
+                        if (!confirm('Esto eliminará el producto de forma permanente. ¿Continuar?')) return
+                        setLoading(true)
+                        try {
+                          await api.delete(`/productos/${p.idProducto}/hard`)
+                          cargar()
+                        } catch (e) {
+                          const resp = e?.response?.data
+                          setError(resp?.errores ? resp.errores.join(', ') : (resp?.mensaje || 'Error eliminando producto'))
+                        } finally {
+                          setLoading(false)
+                        }
+                      }}>Eliminar</button>
                     </td>
                   </tr>
                 ))}
@@ -314,8 +328,12 @@ export default function ProductosPage() {
           <label>Nombre<input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required /></label>
           <label>Descripción<textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} required /></label>
           <label>Ingredientes<textarea value={form.ingredientes} onChange={(e) => setForm({ ...form, ingredientes: e.target.value })} placeholder="Ej: Harina, huevos, chocolate..." /></label>
-          <label>Precio<input type="number" min="0" step="0.01" value={form.precio} onChange={(e) => setForm({ ...form, precio: Number(e.target.value) })} required /></label>
-          <label>Stock<input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} required /></label>
+          <label>Precio<input type="number" min="0" step="0.01" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} required /></label>
+          <label>Stock<input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} required /></label>
+          <label>Estado<select value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })} required>
+            <option value="disponible">Disponible</option>
+            <option value="agotado">Agotado</option>
+          </select></label>
           <label>Categoría<select value={form.idCategoria} onChange={(e) => setForm({ ...form, idCategoria: e.target.value })} required>
             <option value="">Seleccione una categoría</option>
             {categorias.map(c => (
@@ -340,8 +358,12 @@ export default function ProductosPage() {
           <label>Nombre<input value={formCreate.nombre} onChange={(e) => setFormCreate({ ...formCreate, nombre: e.target.value })} required /></label>
           <label>Descripción<textarea value={formCreate.descripcion} onChange={(e) => setFormCreate({ ...formCreate, descripcion: e.target.value })} required /></label>
           <label>Ingredientes<textarea value={formCreate.ingredientes} onChange={(e) => setFormCreate({ ...formCreate, ingredientes: e.target.value })} placeholder="Ej: Harina, huevos, chocolate..." /></label>
-          <label>Precio<input type="number" min="0" step="0.01" value={formCreate.precio} onChange={(e) => setFormCreate({ ...formCreate, precio: Number(e.target.value) })} required /></label>
-          <label>Stock<input type="number" min="0" value={formCreate.stock} onChange={(e) => setFormCreate({ ...formCreate, stock: Number(e.target.value) })} required /></label>
+          <label>Precio<input type="number" min="0" step="0.01" value={formCreate.precio} onChange={(e) => setFormCreate({ ...formCreate, precio: e.target.value })} required /></label>
+          <label>Stock<input type="number" min="0" value={formCreate.stock} onChange={(e) => setFormCreate({ ...formCreate, stock: e.target.value })} required /></label>
+          <label>Estado<select value={formCreate.estado} onChange={(e)=> setFormCreate({ ...formCreate, estado: e.target.value })} required>
+            <option value="disponible">Disponible</option>
+            <option value="agotado">Agotado</option>
+          </select></label>
           <label>Categoría<select value={formCreate.idCategoria} onChange={(e) => setFormCreate({ ...formCreate, idCategoria: e.target.value })} required>
             <option value="">Seleccione una categoría</option>
             {categorias.map(c => (

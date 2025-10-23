@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export default function ProductDetailModal({ product, isOpen, onClose, onAdd }) {
+export default function ProductDetailModal({ product, isOpen, onClose, onAdd, disabledAdd = false }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -100,10 +100,10 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAdd }) 
                 onAdd?.(product)
                 onClose()
               }}
-              disabled={product.stock === 0}
+              disabled={product.stock === 0 || disabledAdd}
             >
               <i className="bi bi-cart-plus me-2"></i>
-              Añadir al carrito
+              {disabledAdd ? 'Límite alcanzado' : 'Añadir al carrito'}
             </button>
           </div>
         </div>

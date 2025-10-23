@@ -41,7 +41,10 @@ public class ProductoControlador {
     private UsuarioServicio usuarioServicio;
 
     @Value("${app.uploads.dir:uploads/imagenes_productos}")
-    private String directorioUploads;
+    private String uploadsDir;
+
+    @Value("${app.uploads.url-prefix:/uploads/imagenes_productos}")
+    private String urlPrefix;
 
     private boolean esAdminPermitido(HttpSession session){
         Object id = session.getAttribute("usuarioId");
@@ -117,7 +120,37 @@ public class ProductoControlador {
     @DeleteMapping("/{id}/hard")
     public ResponseEntity<?> eliminar(@PathVariable Integer id, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
-        if (productoServicio.buscarPorId(id).isEmpty()) return ResponseEntity.notFound().build();
+        Optional<Producto> opt = productoServicio.buscarPorId(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+        // Intentar borrar la imagen física asociada (si existe)
+        try {
+            Producto p = opt.get();
+            String img = p.getImagenUrl();
+            if (img != null && !img.isBlank()) {
+                // normalizar prefijo público
+                String pref = urlPrefix.startsWith("/") ? urlPrefix : "/" + urlPrefix;
+                String nombreArchivo;
+                if (img.startsWith(pref)) {
+                    nombreArchivo = img.substring(pref.length());
+                    if (nombreArchivo.startsWith("/")) nombreArchivo = nombreArchivo.substring(1);
+                } else {
+                    // fallback: tomar el último segmento
+                    int i = img.lastIndexOf('/');
+                    nombreArchivo = (i >= 0 && i + 1 < img.length()) ? img.substring(i + 1) : img;
+                }
+                Path rutaDir = Path.of(uploadsDir).toAbsolutePath().normalize();
+                Path rutaArchivo = rutaDir.resolve(nombreArchivo);
+                try {
+                    Files.deleteIfExists(rutaArchivo);
+                } catch (IOException ex) {
+                    log.warn("No se pudo eliminar el archivo de imagen {}: {}", rutaArchivo, ex.toString());
+                }
+            }
+        } catch (Exception ex) {
+            log.warn("Error al preparar eliminación de imagen para producto {}: {}", id, ex.toString());
+        }
+
         productoServicio.eliminar(id);
         return ResponseEntity.noContent().build();
     }
@@ -154,12 +187,12 @@ public class ProductoControlador {
         if (contentType == null || !contentType.startsWith("image/")) {
             return ResponseEntity.badRequest().body("El archivo debe ser una imagen válida");
         }
-        if (archivo.getSize() > 5 * 1024 * 1024) { // 5MB
-            return ResponseEntity.badRequest().body("La imagen no debe superar 5MB");
+        if (archivo.getSize() > 10 * 1024 * 1024) { // 10MB
+            return ResponseEntity.badRequest().body("La imagen no debe superar 10MB");
         }
         try {
-            // Crear directorio si no existe
-            Path rutaDir = Path.of(directorioUploads).toAbsolutePath().normalize();
+            // Crear directorio físico si no existe
+            Path rutaDir = Path.of(uploadsDir).toAbsolutePath().normalize();
             Files.createDirectories(rutaDir);
             // Nombre único
             String original = archivo.getOriginalFilename();
@@ -167,9 +200,14 @@ public class ProductoControlador {
             String nombreFinal = UUID.randomUUID() + "_" + nombreOriginal;
             Path rutaArchivo = rutaDir.resolve(nombreFinal);
             Files.copy(archivo.getInputStream(), rutaArchivo);
-            // Guardar URL relativa
+            // Guardar URL pública (relativa al servidor) usando el prefijo configurado
             Producto p = opt.get();
-            p.setImagenUrl("/" + directorioUploads + "/" + nombreFinal);
+            String pref = urlPrefix.startsWith("/") ? urlPrefix : "/" + urlPrefix;
+            if (pref.endsWith("/")) {
+                p.setImagenUrl(pref + nombreFinal);
+            } else {
+                p.setImagenUrl(pref + "/" + nombreFinal);
+            }
             productoServicio.actualizar(id, p);
             return ResponseEntity.ok(p);
         } catch (IOException e) {

@@ -70,7 +70,7 @@ public class UsuarioControlador {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Usuario cambios, HttpSession session) {
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody Usuario cambios, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
         Optional<Usuario> opt = usuarioServicio.actualizar(id, cambios);
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -81,5 +81,14 @@ public class UsuarioControlador {
         if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
         usuarioServicio.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<?> actualizarEstado(@PathVariable Integer id, @RequestBody java.util.Map<String,String> body, HttpSession session){
+        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+        String estado = body != null ? body.get("estado") : null;
+        return usuarioServicio.actualizarEstado(id, estado)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().body(java.util.Map.of("error","Estado inválido")));
     }
 }

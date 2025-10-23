@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 
 export default function ProductosPage() {
   const [products, setProducts] = useState([])
-  const { addItem } = useCart()
+  const { addItem, items: cartItems } = useCart()
   const [category, setCategory] = useState('Todos')
   const [categories, setCategories] = useState(['Todos'])
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -26,7 +26,7 @@ export default function ProductosPage() {
       setCategories(['Todos', ...cats.map(c => c.nombre)])
       // prods: [{idProducto, nombre, descripcion, precio, stock, imagenUrl, estado, categoria:{...}, ingredientes}]
       const mapped = prods
-        .filter(p => p.estado === 'disponible')
+        .filter(p => p.estado === 'disponible' && Number(p.stock) > 0)
         .map(p => ({
           id: p.idProducto,
           title: p.nombre,
@@ -60,6 +60,12 @@ export default function ProductosPage() {
     addItem(p)
   }
 
+  function isMaxed(p){
+    const found = (cartItems||[]).find(i => i.id === p.id)
+    const qty = Number(found?.cantidad || 0)
+    return typeof p.stock === 'number' ? qty >= p.stock : false
+  }
+
   function handleViewDetail(product) {
     setSelectedProduct(product)
     setIsModalOpen(true)
@@ -85,7 +91,7 @@ export default function ProductosPage() {
 
       <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
         {shown.map(p => (
-          <ProductCard key={p.id} product={p} onAdd={handleAdd} onViewDetail={handleViewDetail} />
+          <ProductCard key={p.id} product={p} onAdd={handleAdd} onViewDetail={handleViewDetail} disabledAdd={isMaxed(p)} />
         ))}
       </div>
 
@@ -94,6 +100,7 @@ export default function ProductosPage() {
         isOpen={isModalOpen} 
         onClose={handleCloseModal}
         onAdd={handleAdd}
+        disabledAdd={selectedProduct ? isMaxed(selectedProduct) : false}
       />
     </div>
   )

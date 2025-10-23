@@ -11,12 +11,18 @@ export default function LoginPage() {
 
   async function onSubmit(e) {
     e.preventDefault()
-    const ok = await login(email, password)
-    if (ok) {
-  if ((user?.rol) === 'ADMINISTRADOR') nav('/admin/dashboard')
+    const res = await login(email, password)
+    if (res?.ok) {
+      const u = res.user || user
+      if ((u?.rol) === 'ADMINISTRADOR') nav('/admin/dashboard')
       else nav('/')
     }
-    else setError('Credenciales inválidas')
+    else {
+      const m = res?.message
+      // Mapear mensaje específico cuando la cuenta está inactiva/bloqueada
+      if (m && /inactivo|bloquead|inhabilit/i.test(m)) setError('Tu cuenta ha sido inhabilitada')
+      else setError(m || 'Credenciales inválidas')
+    }
   }
 
   return (

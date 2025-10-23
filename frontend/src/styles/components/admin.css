@@ -8,7 +8,7 @@
 	 =============================== */
 
 /* Shell y tema */
-.admin-shell{--sidebar-w:260px;display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh;background:linear-gradient(180deg,#f9f4ee,#fff);width:100%;max-width:100%;overflow-x:hidden}
+.admin-shell{--sidebar-w:260px;display:grid;grid-template-columns:var(--sidebar-w) 1fr;gap:0;min-height:100vh;background:linear-gradient(180deg,#f9f4ee,#fff);width:100%;max-width:100%;overflow-x:hidden}
 .admin-shell.is-collapsed{--sidebar-w:72px}
 .admin-shell.is-collapsed .admin-brand .brand-text{display:none}
 .admin-shell.is-collapsed .admin-link .text{display:none}
@@ -20,16 +20,19 @@
 .admin-shell.is-collapsed.is-hover .admin-sidebar-footer .meta{display:flex}
 
 /* Sidebar */
-.admin-sidebar{position:sticky;top:0;height:100dvh;background:linear-gradient(180deg,var(--cacao) 0%, #3a2622 100%);color:#fff;display:flex;flex-direction:column;gap:.75rem;transition:transform .25s ease,width .25s ease;overflow-y:auto;overflow-x:hidden;width:var(--sidebar-w);z-index:2001;scrollbar-width:none;-ms-overflow-style:none}
+.admin-sidebar{position:sticky;top:0;height:100dvh;background:linear-gradient(180deg,var(--cacao) 0%, #3a2622 100%);color:#fff;display:flex;flex-direction:column;gap:.75rem;transition:transform .25s ease,width .25s ease;overflow-y:auto;overflow-x:hidden;width:var(--sidebar-w);z-index:2001;scrollbar-width:none;-ms-overflow-style:none;border-right:1px solid rgba(255,255,255,.08)}
 .admin-sidebar::-webkit-scrollbar{display:none}
 .admin-brand{display:flex;align-items:center;gap:.6rem;padding:1rem .9rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.admin-brand a{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
+.admin-brand .brand-home{padding:.15rem;border-radius:.5rem}
+.admin-brand .brand-home:hover{background:rgba(255,255,255,.08)}
 .brand-text{font-weight:700;letter-spacing:.3px}
 .admin-nav{display:flex;flex-direction:column;padding:.5rem}
 .admin-link{display:flex;align-items:center;gap:.75rem;color:#f7eada;text-decoration:none;padding:.6rem .8rem;border-radius:.6rem;transition:background .2s ease, transform .12s ease}
 .admin-link:hover{background:rgba(255,255,255,.08);transform:translateX(2px)}
 .admin-link.active{background:rgba(255,255,255,.14)}
 .admin-link .icon{width:24px;display:inline-grid;place-items:center}
-.admin-sidebar-footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;border-top:1px solid rgba(255,255,255,.08)}
+.admin-sidebar-footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding:.8rem .9rem 1.1rem;border-top:1px solid rgba(255,255,255,.08)}
 .btn-sidebar{background:transparent;border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:.6rem;padding:.4rem .65rem}
 .userbox{display:flex;align-items:center;gap:.6rem}
 .userbox .avatar{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;background:#6c4b43;color:#fff;font-weight:700}
@@ -51,6 +54,11 @@
 /* Contenido */
 .admin-content{padding:1.1rem;width:100%;max-width:100%}
 .admin-container{width:100%;max-width:1360px;margin:0 auto;padding:0 12px}
+/* Eliminar separación visual entre sidebar y contenido a la izquierda */
+.admin-topbar .admin-container{padding-left:8px;max-width:none;margin-left:0;margin-right:0}
+.admin-content.admin-container{padding-left:8px;max-width:none;margin-left:0;margin-right:0}
+/* En pantallas grandes podemos mantener padding-right para aire sin crear franja a la izquierda */
+.admin-content.admin-container{padding-right:12px}
 .toolbar{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
 .toolbar > *{min-width:180px}
 /* Grid base y variantes para layouts conocidos */
@@ -88,12 +96,20 @@
 .admin-content .card h3{font-size:1.05rem;margin-bottom:.85rem}
 .admin-content .card.stat{display:flex;flex-direction:column;align-items:flex-start;gap:.25rem}
 .admin-content .card .big{font-weight:700;font-size:1.7rem;color:var(--cacao)}
-.admin-content .btn{background:#fff;border:1px solid rgba(0,0,0,.18);border-radius:.6rem;padding:.45rem .75rem}
+.admin-content .btn{background:#fff;border:1px solid rgba(0,0,0,.18);border-radius:.6rem;padding:.45rem .75rem;line-height:1.2;min-height:34px}
 .admin-content .btn:hover{background:#fcfaf8}
 .admin-content .btn-primary{background:var(--oro);border-color:var(--oro);color:#fff}
 .admin-content .btn-primary:hover{background:#9f7354;border-color:#9f7354}
 .admin-content .btn-danger{background:#fce8e6;border-color:#f5c2c7;color:#8a1c1c}
 .admin-content .btn-danger:hover{background:#f9d6d3}
+/* Botón de Habilitar/Restaurar (verde oliva de la paleta) */
+.admin-content .btn-success{background:#d7ecd2;border-color:var(--oliva);color:#2f5d2f}
+.admin-content .btn-success:hover{background:#c8e5c1;border-color:#9ec79b;color:#254c25}
+/* Botón de acciones secundarias */
+.admin-content .btn-outline-secondary{background:#fff;border-color:rgba(0,0,0,.22);color:#4a4a4a}
+.admin-content .btn-outline-secondary:hover{background:#f6f2ec;border-color:rgba(0,0,0,.28)}
+.admin-content .btn-outline-danger{background:#fff;border-color:#f5c2c7;color:#8a1c1c}
+.admin-content .btn-outline-danger:hover{background:#fff5f4}
 .admin-content .error{margin-top:.6rem;color:#b42318;background:#fee4e2;border:1px solid #fda29b;border-radius:.6rem;padding:.6rem}
 .admin-content .table thead th{background:#f3ede6;position:sticky;top:0;z-index:1;border-bottom:1px solid rgba(0,0,0,.18)}
 .admin-content .table tbody td{background:#ffffff;border-bottom:1px solid rgba(0,0,0,.10)}

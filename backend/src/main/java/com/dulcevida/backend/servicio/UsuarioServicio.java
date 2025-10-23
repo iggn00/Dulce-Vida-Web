@@ -79,4 +79,15 @@ public class UsuarioServicio {
     public void eliminar(Integer id) {
         usuarioRepositorio.deleteById(Objects.requireNonNull(id));
     }
+
+    public Optional<Usuario> actualizarEstado(Integer id, String estado){
+        if (estado == null) return Optional.empty();
+        String norm = estado.trim().toLowerCase();
+        if (!norm.equals("activo") && !norm.equals("inactivo")) return Optional.empty();
+        return usuarioRepositorio.findById(Objects.requireNonNull(id)).map(u -> {
+            u.setEstado(norm);
+            usuarioRepositorio.save(u);
+            return u;
+        });
+    }
 }

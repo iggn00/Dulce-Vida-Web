@@ -1,70 +1,111 @@
-# 🍰 Dulce Vida Web
+<h1 align="center">🍰 Dulce Vida Web</h1>
+<h3 align="center">Catálogo y Gestión de Repostería — React + Spring Boot</h3>
 
-Bienvenido/a al repositorio de Dulce Vida, un proyecto hecho con cariño para presentar y administrar productos de repostería. Incluye:
-- Backend en Spring Boot (Java) con MySQL y sesiones.
-- Frontend en React (Vite) con panel de administración, carrito y páginas públicas.
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-React%2018-61DBFB?style=for-the-badge&logo=react" />
+  <img src="https://img.shields.io/badge/Backend-Spring%20Boot%203-6DB33F?style=for-the-badge&logo=springboot" />
+  <img src="https://img.shields.io/badge/Database-MySQL%208-4479A1?style=for-the-badge&logo=mysql" />
+  <img src="https://img.shields.io/badge/Build-Vite%20%2B%20Maven-orange?style=for-the-badge" />
+</p>
+
+<p align="center">
+  <b>Proyecto FullStack con frontend en React (Vite) y backend en Spring Boot (Java), con sesiones, carrito de compras y panel de administración.</b>
+</p>
+
+---
+
+## 🧾 Descripción del proyecto
+
+Dulce Vida Web es una plataforma para la gestión integral de productos de repostería. Incluye un catálogo público, carrito de compras con sesión y un panel administrativo para gestionar usuarios, categorías y productos (incluida la carga de imágenes).
+
+- Frontend moderno con React 18 y Vite.
+- Backend en Spring Boot 3, conectado a MySQL y autenticación basada en sesión (HttpSession).
 - Scripts SQL para crear y poblar la base de datos.
-
-Con esta guía, nadie se pierde. Prometido. 💖
-
-## Estructura
-
-- `backend/`: API REST en Spring Boot (Java) conectada a MySQL.
-- `frontend/`: Aplicación React (Vite).
-- `frontend/public/img/`: Imágenes públicas servidas como `/img/...`.
-- `backend/sql/`: Scripts SQL para crear y poblar la base.
+- Opción de servir el build del frontend directamente desde Spring Boot para producción.
 
 ---
 
-## Requisitos
+## 🖼️ Vistas principales
 
-- Java 17+ (Spring Boot 3 usa Jakarta)
-- Maven (o el wrapper incluido `mvnw`/`mvnw.cmd`)
+| 🛍️ Tienda pública | 🔐 Panel de Administración |
+|-------------------|----------------------------|
+| (Capturas próximamente) | (Capturas próximamente) |
+
+---
+
+## ⚙️ Tecnologías utilizadas
+
+<details>
+<summary>🖥️ <b>Frontend</b></summary>
+
+- ⚛️ React 18 con Vite  
+- 🎨 CSS y assets estáticos servidos desde `/frontend/public`  
+- 🔗 Consumo de API vía `VITE_API_URL`  
+- 🧭 Rutas públicas y de sesión (login, registro, carrito)  
+</details>
+
+<details>
+<summary>☕ <b>Backend (Spring Boot)</b></summary>
+
+- 🌱 Spring Boot 3 (Jakarta)  
+- 🗄️ MySQL 8.x (conexión vía properties)  
+- 🧪 Bean Validation y controladores REST  
+- 🖼️ Servido de archivos estáticos e imágenes subidas  
+- 🔐 Autenticación basada en sesión (HttpSession), sin JWT  
+</details>
+
+<details>
+<summary>🏗️ <b>Arquitectura</b></summary>
+
+- Monolito FullStack con separación de carpetas `frontend/` y `backend/`  
+- Frontend en desarrollo con Vite; para prod, build servido por Spring Boot  
+- Endpoints REST en `/auth` y `/api`  
+</details>
+
+---
+
+## 🧩 Estructura del proyecto
+
+```
+Dulce-Vida-Web/
+│
+├── backend/                      # API Spring Boot (Java)
+│   ├── src/main/resources/
+│   │   ├── application.properties
+│   │   └── static/               # Recibe el build del frontend en producción
+│   └── sql/                      # Scripts SQL: creación + datos de ejemplo
+│
+└── frontend/                     # App React (Vite)
+    ├── public/
+    │   └── img/                  # Imágenes públicas servidas como /img/...
+    └── src/                      # Componentes, páginas, estilos
+```
+
+---
+
+## 💻 Instalación y ejecución
+
+### 🧱 1. Clonar el repositorio
+```bash
+git clone https://github.com/iggn00/Dulce-Vida-Web.git
+cd Dulce-Vida-Web
+```
+
+### ⚙️ 2. Requisitos
+- Java 17+ y Maven (o `mvnw`/`mvnw.cmd`)
 - Node.js 18+ y npm
-- MySQL 8.x
-- XAMPP (para levantar MySQL fácilmente; Apache opcional)
-- MySQL Workbench (o tu cliente SQL favorito)
+- MySQL 8.x (puedes usar XAMPP para levantar MySQL fácilmente)
+- Cliente SQL (Workbench u otro)
 
----
+### 🗄️ 3. Base de datos
+- Inicia MySQL.
+- Ejecuta los scripts de `backend/sql/` para crear la base y poblarla.
+- Anota el nombre de la base y credenciales.
 
-## ¿Cómo lo inicio? (paso a paso con amor)
-
-1) Base de datos (XAMPP + Workbench)
-- Abre XAMPP y enciende MySQL (Apache puede quedar encendido también si lo usas).
-- Abre MySQL Workbench y ejecuta los scripts en `backend/sql/`:
-  - Crea la base de datos y tablas.
-  - Inserta los datos de ejemplo.
-- Recuerda el nombre de la base de datos para la configuración del backend.
-
-2) Backend (Spring Boot)
-- Como te gusta hacerlo:
-  - Abre el repo en tu IDE (VS Code/IntelliJ).
-  - Ve a `DulceVidaAplicacion.java` (clase principal de Spring Boot) y presiona “Run”.
-- Alternativa por terminal:
-  - Windows: `cd backend && ./mvnw.cmd spring-boot:run`
-  - macOS/Linux: `cd backend && ./mvnw spring-boot:run`
-- Por defecto levanta en `http://localhost:8080`.
-
-3) Frontend (Vite + React)
-- Variables:
-  - Crea o valida `frontend/.env` con:
-    - `VITE_API_URL=http://localhost:8080`
-- Arranque:
-  - `cd frontend`
-  - `npm install`
-  - `npm run dev`
-- Se abre en `http://localhost:5173`. El dev server proxya `/api` y `/img` al backend.
-
-¡Listo! Entra a `http://localhost:5173` y disfruta.
-
----
-
-## Configuración del backend
-
-Edita `backend/src/main/resources/application.properties` según tu entorno:
+### 🔧 4. Configurar backend
+Edita `backend/src/main/resources/application.properties`:
 
 ```properties
-# Conexión a MySQL (XAMPP suele usar root sin contraseña)
 spring.datasource.url=jdbc:mysql://localhost:3306/tu_basedatos?useSSL=false&serverTimezone=UTC
 spring.datasource.username=root
 spring.datasource.password=
@@ -72,170 +113,183 @@ spring.datasource.password=
 spring.jpa.hibernate.ddl-auto=none
 spring.jpa.show-sql=true
 
-# Directorio donde se guardan imágenes subidas de productos
+# Directorio para imágenes subidas de productos
 app.uploads.dir=uploads/imagenes_productos
-# Prefijo público con el que se servirán las imágenes subidas
 app.uploads.url-prefix=/uploads/imagenes_productos
 
-# Controla si el registro público puede crear cuentas ADMIN
+# Control registro ADMIN por alta pública
 app.registration.allowAdmin=false
 ```
 
-Notas:
-- Cambia `tu_basedatos` por el nombre real creado con los scripts.
-- Si tu usuario MySQL tiene contraseña, colócala en `spring.datasource.password`.
-- El directorio `uploads/imagenes_productos` se crea automáticamente al subir imágenes.
+### 🟢 5. Levantar backend
+```bash
+# Windows
+cd backend && ./mvnw.cmd spring-boot:run
+
+# macOS/Linux
+cd backend && ./mvnw spring-boot:run
+```
+Por defecto: [http://localhost:8080](http://localhost:8080)
+
+### 🔵 6. Levantar frontend
+Configura `frontend/.env`:
+```
+VITE_API_URL=http://localhost:8080
+```
+
+Instala y arranca:
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+Frontend dev: [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## Build unificado (servir React desde Spring Boot)
+## 🎯 Build para producción (unificado)
 
-Para producción o sin Vite en dev:
+1) Generar build del frontend:
+```bash
+cd frontend
+npm run build
+```
 
-1) Genera el build del frontend:
-- `cd frontend`
-- `npm run build`
-
-2) Inicia el backend:
-- Windows: `cd backend && ./mvnw.cmd spring-boot:run`
-- macOS/Linux: `cd backend && ./mvnw spring-boot:run`
-
-El build de Vite se coloca en `backend/src/main/resources/static` y Spring Boot lo sirve automáticamente.
-
----
-
-## Rutas principales del sitio
-
-- Público: `/` (Home), `/productos`, `/nosotros`, `/contacto`
-- Sesión: `/login`, `/register`, `/carrito`
-- Admin: `/admin/dashboard`, `/admin/productos`, `/admin/usuarios`
+2) Iniciar el backend (servirá el build desde `backend/src/main/resources/static`):
+```bash
+# Windows
+cd ../backend && ./mvnw.cmd spring-boot:run
+# macOS/Linux
+cd ../backend && ./mvnw spring-boot:run
+```
 
 ---
 
+## 🔐 Autenticación y roles
 
-## Autenticación
-
-
-
-- Sesiones con `HttpSession` (sin JWT). El navegador almacena la cookie `JSESSIONID`.
-- Endpoints disponibles en dos prefijos:
-  - Preferidos para login/registro: `/auth`
-  - Compatibles con el resto del API: `/api`
-
-Roles:
-- `USUARIO` y `ADMINISTRADOR`.
-- El registro público asigna `USUARIO` por defecto (a menos que `app.registration.allowAdmin=true`).
+- Sesiones con `HttpSession` (cookie `JSESSIONID`)  
+- Prefijos recomendados:
+  - `/auth` para login/registro/session/logout
+  - `/api` para el resto del CRUD
+- Roles: `USUARIO` y `ADMINISTRADOR`  
+  - El registro público crea `USUARIO` por defecto (controlado por `app.registration.allowAdmin`)
 
 ---
 
-## Endpoints del API
+## 📚 Endpoints clave
 
 Base: `http://localhost:8080`
 
-Autenticación (/auth)
-- POST `/auth/login`
-  - Body: `{ "email": "user@correo.com", "password": "..." }`
-  - Devuelve datos del usuario y crea sesión.
-- POST `/auth/register`
-  - Crea usuario; si no está permitido crear ADMIN por registro, asigna `USUARIO`.
-- GET `/auth/session`
-  - Devuelve el usuario autenticado según la sesión.
-- POST `/auth/logout`
-  - Invalida la sesión.
+<details>
+<summary>👤 <b>Autenticación</b></summary>
 
-Autenticación alternativa (/api)
+- POST `/auth/login`  
+- POST `/auth/register`  
+- GET  `/auth/session`  
+- POST `/auth/logout`  
+
+Alternativa compatible:
 - POST `/api/login`
-- GET `/api/session`
+- GET  `/api/session`
 - POST `/api/logout`
+</details>
 
-Usuarios (/api/usuarios) [requiere ADMIN salvo alta pública en POST]
-- GET `/api/usuarios` → Listar usuarios.
-- GET `/api/usuarios/{id}` → Detalle.
-- GET `/api/usuarios/buscar?q=texto` → Búsqueda por nombre/email.
-- POST `/api/usuarios` → Crear usuario.
-  - Si no hay sesión o no es ADMIN, el rol se controla por `app.registration.allowAdmin`.
-  - Si es ADMIN, puede crear con cualquier rol válido.
-- PUT `/api/usuarios/{id}` → Actualizar.
-- DELETE `/api/usuarios/{id}` → Eliminar.
+<details>
+<summary>🍮 <b>Productos</b></summary>
 
-Productos (/api/productos)
-- GET `/api/productos` → Listar.
-- GET `/api/productos?page={n}&size={m}` → Listar paginado.
-- GET `/api/productos/{id}` → Detalle.
-- GET `/api/productos/buscar?q=...&categoria=...&idCategoria=...`
-  - Filtros por texto, nombre de categoría o id de categoría.
-- POST `/api/productos` → Crear (ADMIN).
-- PUT `/api/productos/{id}` → Actualizar (ADMIN).
-- DELETE `/api/productos/{id}` → Inhabilitar (ADMIN).
-- DELETE `/api/productos/{id}/hard` → Eliminar definitivamente (ADMIN). Intenta borrar la imagen física asociada.
-- PATCH `/api/productos/{id}/estado` → Cambiar estado.
-  - Body: `{ "estado": "disponible" | "agotado" }` (validación estricta).
-- POST `/api/productos/{id}/restaurar` → Marca como `disponible` (ADMIN).
-- POST `/api/productos/{id}/imagen` → Subir imagen (ADMIN).
-  - Form-data: campo `archivo` (imagen, máx. 10MB). Guarda archivo en `app.uploads.dir` y expone URL con `app.uploads.url-prefix`.
-- GET `/api/productos/bajo-stock?umbral=5` → Lista productos con stock bajo (umbral configurable).
+- GET `/api/productos` (paginación opcional: `page`, `size`)  
+- GET `/api/productos/{id}`  
+- GET `/api/productos/buscar?q=...&categoria=...&idCategoria=...`  
+- POST `/api/productos` (ADMIN)  
+- PUT `/api/productos/{id}` (ADMIN)  
+- DELETE `/api/productos/{id}` (ADMIN, soft delete)  
+- DELETE `/api/productos/{id}/hard` (ADMIN, elimina físicamente)  
+- PATCH `/api/productos/{id}/estado`  
+- POST `/api/productos/{id}/imagen` (subida de imagen, form-data `archivo`)  
+- GET `/api/productos/bajo-stock?umbral=5`
+</details>
 
-Categorías (/api/categorias)
-- GET `/api/categorias` → Listar.
-- GET `/api/categorias/{id}` → Detalle.
-- POST `/api/categorias` → Crear (ADMIN).
-- PUT `/api/categorias/{id}` → Actualizar (ADMIN).
-- DELETE `/api/categorias/{id}` → Eliminar (ADMIN).
+<details>
+<summary>🏷️ <b>Categorías</b></summary>
 
-Carrito (/api/cart)
-- GET `/api/cart` → Obtiene el carrito de la sesión.
-- POST `/api/cart/add` → Agregar producto.
-  - Body: `{ "idProducto": 123, "cantidad": 1 }` (cantidad por defecto: 1).
-- DELETE `/api/cart/item/{idDetalle}` → Quitar ítem del carrito.
-- DELETE `/api/cart/clear` → Limpiar carrito.
-- POST `/api/cart/checkout` → Finalizar compra.
-  - Requiere usuario autenticado; maneja errores de validación.
+- GET `/api/categorias`  
+- GET `/api/categorias/{id}`  
+- POST `/api/categorias` (ADMIN)  
+- PUT `/api/categorias/{id}` (ADMIN)  
+- DELETE `/api/categorias/{id}` (ADMIN)  
+</details>
 
-Contacto (/api/contactos)
-- POST `/api/contactos` → Crear mensaje de contacto.
-- GET `/api/contactos` → Listar mensajes.
+<details>
+<summary>🛒 <b>Carrito</b></summary>
 
-Archivos estáticos
-- Imágenes públicas: `/img/...` sirven desde `frontend/public/img`.
+- GET `/api/cart`  
+- POST `/api/cart/add` — body: `{ "idProducto": 123, "cantidad": 1 }`  
+- DELETE `/api/cart/item/{idDetalle}`  
+- DELETE `/api/cart/clear`  
+- POST `/api/cart/checkout` (requiere usuario autenticado)  
+</details>
 
-Nota: Esta lista se basa en los controladores detectados y puede estar incompleta. Puedes explorar más en el buscador de código: [Buscar @RestController en el repo](https://github.com/search?q=repo%3Aiggn00%2FDulce-Vida-Web+%40RestController&type=code).
+<details>
+<summary>📬 <b>Contacto</b></summary>
+
+- POST `/api/contactos`  
+- GET `/api/contactos` (ADMIN)  
+</details>
 
 ---
 
-## Comandos útiles
+## 🧭 Funcionalidades principales
 
-Backend
-- Dev:
-  - Windows: `cd backend && ./mvnw.cmd spring-boot:run`
-  - macOS/Linux: `cd backend && ./mvnw spring-boot:run`
-- Build:
-  - Windows: `cd backend && ./mvnw.cmd clean package`
-  - macOS/Linux: `cd backend && ./mvnw clean package`
-
-Frontend
-- Dev: `cd frontend && npm run dev`
-- Build: `cd frontend && npm run build`
+- ✅ Catálogo público con filtros y detalle de producto  
+- ✅ Carrito de compras con estado en sesión  
+- ✅ Panel administrativo: productos, usuarios y categorías  
+- ✅ Carga y servido de imágenes de productos  
+- ✅ Rutas públicas y de sesión; control de roles básico  
+- 🚧 Validaciones avanzadas, pruebas y documentación ampliada
 
 ---
 
-## Solución de problemas
+## 💡 Consejos y solución de problemas
 
-- “No conecta a MySQL”
-  - Verifica MySQL encendido en XAMPP.
-  - Revisa `spring.datasource.url`, usuario y contraseña.
-- “Sesión no persiste o CORS”
-  - Levanta frontend en `http://localhost:5173` y backend en `http://localhost:8080`.
-  - Usa `VITE_API_URL=http://localhost:8080`. Vite proxya `/api` y `/img`.
-- “Error al subir imagen”
-  - Verifica permisos de escritura y existencia de `app.uploads.dir`.
-  - Asegura que el archivo sea imagen válida y menor a 10MB.
-- “No carga el frontend en producción”
-  - Ejecuta `npm run build` en `frontend` y luego arranca el backend.
+- Conexión MySQL: revisa `spring.datasource.*` y que MySQL esté activo  
+- CORS/sesión: usa `VITE_API_URL=http://localhost:8080` y frontend en `5173`  
+- Subida de imágenes: verifica permisos del directorio `app.uploads.dir`  
+- Frontend en prod: recuerda `npm run build` antes de levantar el backend
 
 ---
 
-## Licencia
+## 👥 Autor
 
-Proyecto académico/educativo. Úsalo y ajústalo como necesites.
+| Nombre   | Rol                     | Contacto                           |
+|----------|-------------------------|------------------------------------|
+| iggn00   | Desarrollador FullStack | [@iggn00](https://github.com/iggn00) |
 
-Hecho con mucho amor para que nadie se pierda. 💕
+---
+
+## 🏁 Estado actual
+
+| Estado | Funcionalidad                                          |
+|-------:|--------------------------------------------------------|
+| ✅     | Frontend y Backend integrados (sesiones)               |
+| ✅     | CRUD de productos y categorías                         |
+| ✅     | Carrito y checkout con validaciones básicas            |
+| ✅     | Subida y servido de imágenes                           |
+| 🚧     | Test automatizados, documentación ampliada y despliegue|
+
+---
+
+## 🪄 Próximos pasos
+
+- 🔐 Endurecer autorización por rol en endpoints críticos  
+- 🧪 Pruebas unitarias/e2e y CI básica  
+- 🐳 Contenerización con Docker (multi-stage para Vite + Spring)  
+- ☁️ Despliegue en servicios gestionados (Render, Railway, Vercel + API)  
+
+---
+
+## 🪶 Licencia y frase de cierre
+
+<p align="center">
+  <b>“Sabor a dulce, código impecable.”</b><br><br>
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
+</p>

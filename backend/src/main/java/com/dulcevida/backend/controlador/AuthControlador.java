@@ -32,7 +32,7 @@ public class AuthControlador {
                         "codigo", "cuenta_inactiva",
                         "mensaje", "Tu cuenta ha sido inhabilitada, Contacta al Administrador."));
             }
-            // Validar contraseña en texto plano (sin cifrar)
+            
             if (password.equals(u.getPassword())) {
                 session.setAttribute("usuarioId", u.getIdUsuario());
                 session.setAttribute("usuarioEmail", u.getEmail());
@@ -50,7 +50,7 @@ public class AuthControlador {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody Usuario usuario) {
-        // Permitir especificar rol al crear cuenta; si es inválido, usar USUARIO
+        
         String rol = usuario.getRol();
         if (rol == null || !("ADMINISTRADOR".equalsIgnoreCase(rol) || "USUARIO".equalsIgnoreCase(rol))) {
             usuario.setRol("USUARIO");

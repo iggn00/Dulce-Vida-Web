@@ -75,7 +75,7 @@ public class ProductoServicio {
         });
     }
 
-    // Paginación y ordenamiento
+    
     public org.springframework.data.domain.Page<Producto> listar(org.springframework.data.domain.Pageable pageable) {
         return productoRepositorio.findAll(pageable);
     }

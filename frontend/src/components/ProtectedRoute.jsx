@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 export default function ProtectedRoute({ requiredRoles, allowedEmails }) {
   const { isAuthenticated, initialized, user } = useAuth()
-  // Evitar redirigir mientras validamos la sesión al cargar la app
+  
   if (!initialized) return null
   if (!isAuthenticated) return <Navigate to="/login" replace />
   if (requiredRoles && Array.isArray(requiredRoles)) {

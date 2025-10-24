@@ -26,7 +26,7 @@ public class AutenticacionControlador {
         Optional<Usuario> opt = usuarioServicio.buscarPorEmail(email);
     if (opt.isPresent() && password != null && password.equals(opt.get().getPassword())) {
             Usuario u = opt.get();
-            // Crear sesión simple sin JWT
+            
             session.setAttribute("usuarioId", u.getIdUsuario());
             session.setAttribute("usuarioEmail", u.getEmail());
             return ResponseEntity.ok(Map.of(

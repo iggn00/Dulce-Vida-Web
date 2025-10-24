@@ -61,7 +61,7 @@ public class ProductoControlador {
         return productos;
     }
 
-    // Versión paginada cuando se incluyen los parámetros page y size
+    
     @GetMapping(params = {"page", "size"})
     public Page<Producto> listarPaginado(Pageable pageable) {
         return productoServicio.listar(pageable);
@@ -123,19 +123,19 @@ public class ProductoControlador {
         Optional<Producto> opt = productoServicio.buscarPorId(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
-        // Intentar borrar la imagen física asociada (si existe)
+        
         try {
             Producto p = opt.get();
             String img = p.getImagenUrl();
             if (img != null && !img.isBlank()) {
-                // normalizar prefijo público
+                
                 String pref = urlPrefix.startsWith("/") ? urlPrefix : "/" + urlPrefix;
                 String nombreArchivo;
                 if (img.startsWith(pref)) {
                     nombreArchivo = img.substring(pref.length());
                     if (nombreArchivo.startsWith("/")) nombreArchivo = nombreArchivo.substring(1);
                 } else {
-                    // fallback: tomar el último segmento
+                    
                     int i = img.lastIndexOf('/');
                     nombreArchivo = (i >= 0 && i + 1 < img.length()) ? img.substring(i + 1) : img;
                 }
@@ -187,20 +187,20 @@ public class ProductoControlador {
         if (contentType == null || !contentType.startsWith("image/")) {
             return ResponseEntity.badRequest().body("El archivo debe ser una imagen válida");
         }
-        if (archivo.getSize() > 10 * 1024 * 1024) { // 10MB
+        if (archivo.getSize() > 10 * 1024 * 1024) { 
             return ResponseEntity.badRequest().body("La imagen no debe superar 10MB");
         }
         try {
-            // Crear directorio físico si no existe
+            
             Path rutaDir = Path.of(uploadsDir).toAbsolutePath().normalize();
             Files.createDirectories(rutaDir);
-            // Nombre único
+            
             String original = archivo.getOriginalFilename();
             String nombreOriginal = StringUtils.cleanPath(original != null ? original : "unnamed");
             String nombreFinal = UUID.randomUUID() + "_" + nombreOriginal;
             Path rutaArchivo = rutaDir.resolve(nombreFinal);
             Files.copy(archivo.getInputStream(), rutaArchivo);
-            // Guardar URL pública (relativa al servidor) usando el prefijo configurado
+            
             Producto p = opt.get();
             String pref = urlPrefix.startsWith("/") ? urlPrefix : "/" + urlPrefix;
             if (pref.endsWith("/")) {

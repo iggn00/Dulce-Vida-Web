@@ -1,49 +1,49 @@
--- =====================================================================================================
--- SCRIPT DE INICIALIZACIÓN DE BASE DE DATOS - DULCE VIDA
--- =====================================================================================================
--- Descripción: Script completo para crear y poblar la base de datos del sistema de pastelería
--- Autor: Sistema Dulce Vida
--- Fecha: 2025-10-23
--- Versión: 2.0
--- =====================================================================================================
 
--- -----------------------------------------------------------------------------------------------------
--- 1. CONFIGURACIÓN INICIAL
--- -----------------------------------------------------------------------------------------------------
 
--- Crear base de datos (si no existe) con codificación UTF-8
+
+
+
+
+
+
+
+
+
+
+
+
 CREATE DATABASE IF NOT EXISTS dulcevidadb 
   CHARACTER SET utf8mb4 
   COLLATE utf8mb4_unicode_ci;
 
--- Seleccionar la base de datos
+
 USE dulcevidadb;
 
--- Configurar zona horaria
+
 SET time_zone = '-03:00';
 
--- -----------------------------------------------------------------------------------------------------
--- 2. ELIMINACIÓN DE TABLAS EXISTENTES (en orden correcto por dependencias)
--- -----------------------------------------------------------------------------------------------------
 
--- Eliminar tablas dependientes primero
+
+
+
+
 DROP TABLE IF EXISTS Detalle_Pedido;
 DROP TABLE IF EXISTS Pedidos;
 DROP TABLE IF EXISTS Clientes;
 DROP TABLE IF EXISTS Contactos;
 
--- Eliminar tablas principales
+
 DROP TABLE IF EXISTS Productos;
 DROP TABLE IF EXISTS Categorias;
-DROP TABLE IF EXISTS Categoria;  -- Eliminar tabla antigua si existe (singular)
+DROP TABLE IF EXISTS Categoria;  
 DROP TABLE IF EXISTS Usuario;
 
--- -----------------------------------------------------------------------------------------------------
--- 3. CREACIÓN DE TABLAS
--- -----------------------------------------------------------------------------------------------------
 
--- Tabla: Usuario
--- Descripción: Almacena usuarios del sistema (administradores y clientes)
+
+
+
+
+
 CREATE TABLE Usuario (
   id_usuario INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -51,12 +51,17 @@ CREATE TABLE Usuario (
   password VARCHAR(255) NOT NULL,
   rol VARCHAR(20) NOT NULL CHECK (rol IN ('ADMINISTRADOR', 'USUARIO')),
   estado VARCHAR(20) NOT NULL DEFAULT 'activo' CHECK (estado IN ('activo', 'inactivo')),
+  rut VARCHAR(12) NOT NULL,
+  dv CHAR(1) NOT NULL CHECK (dv IN ('1','2','3','4','5','6','7','8','9','K')),
+  region VARCHAR(100) NOT NULL,
+  comuna VARCHAR(100) NOT NULL,
+  UNIQUE KEY uk_rut_dv (rut, dv),
   INDEX idx_email (email),
   INDEX idx_rol (rol)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: Categorias
--- Descripción: Categorías de productos (Tortas, Galletas, etc.)
+
+
 CREATE TABLE Categorias (
   id_categoria INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -64,8 +69,8 @@ CREATE TABLE Categorias (
   INDEX idx_nombre (nombre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: Productos
--- Descripción: Catálogo de productos de la pastelería
+
+
 CREATE TABLE Productos (
   id_producto INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -86,8 +91,8 @@ CREATE TABLE Productos (
   INDEX idx_categoria (id_categoria)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: Clientes
--- Descripción: Información de clientes (puede generarse automáticamente desde Usuario)
+
+
 CREATE TABLE Clientes (
   id_cliente INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -97,8 +102,8 @@ CREATE TABLE Clientes (
   INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: Pedidos
--- Descripción: Pedidos realizados por clientes (incluye carrito temporal)
+
+
 CREATE TABLE Pedidos (
   id_pedido INT AUTO_INCREMENT PRIMARY KEY,
   id_cliente INT NOT NULL,
@@ -116,8 +121,8 @@ CREATE TABLE Pedidos (
   INDEX idx_fecha (fecha_pedido)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: Detalle_Pedido
--- Descripción: Líneas de detalle de cada pedido (items del carrito)
+
+
 CREATE TABLE Detalle_Pedido (
   id_detalle INT AUTO_INCREMENT PRIMARY KEY,
   id_pedido INT NOT NULL,
@@ -138,8 +143,8 @@ CREATE TABLE Detalle_Pedido (
   INDEX idx_producto (id_producto)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: Contactos
--- Descripción: Mensajes de contacto enviados desde el formulario web
+
+
 CREATE TABLE Contactos (
   id_contacto INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -152,9 +157,9 @@ CREATE TABLE Contactos (
   INDEX idx_fecha (fecha_envio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------------------------------
--- 4. DATOS INICIALES - CATEGORÍAS
--- -----------------------------------------------------------------------------------------------------
+
+
+
 
 INSERT INTO Categorias (nombre, descripcion) VALUES
   ('Tortas', 'Tortas para toda ocasión'),
@@ -164,11 +169,11 @@ INSERT INTO Categorias (nombre, descripcion) VALUES
   ('Macarons', 'Macarons franceses de diferentes sabores')
 ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion);
 
--- -----------------------------------------------------------------------------------------------------
--- 5. DATOS INICIALES - PRODUCTOS
--- -----------------------------------------------------------------------------------------------------
 
--- Productos de categoría: TORTAS
+
+
+
+
 INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria, imagen_url, ingredientes) VALUES
   ('Torta Chocolate Clásica', 
    'Bizcocho húmedo de chocolate con cobertura de ganache', 
@@ -192,7 +197,7 @@ INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria,
    'Harina, cacao, colorante rojo, queso crema, buttermilk')
 ON DUPLICATE KEY UPDATE stock = VALUES(stock);
 
--- Productos de categoría: GALLETAS
+
 INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria, imagen_url, ingredientes) VALUES
   ('Cookies Chips Chocolate', 
    'Galletas crujientes con chispas de chocolate', 
@@ -216,7 +221,7 @@ INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria,
    'Harina, mantequilla, azúcar, esencia de vainilla')
 ON DUPLICATE KEY UPDATE stock = VALUES(stock);
 
--- Productos de categoría: PASTELES
+
 INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria, imagen_url, ingredientes) VALUES
   ('Pastel de Frutas', 
    'Pastel con crema y frutas de estación', 
@@ -240,7 +245,7 @@ INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria,
    'Zanahoria, harina, nueces, especias, queso crema')
 ON DUPLICATE KEY UPDATE stock = VALUES(stock);
 
--- Productos de categoría: CHEESECAKES
+
 INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria, imagen_url, ingredientes) VALUES
   ('Cheesecake Frutilla', 
    'Cheesecake cremoso con salsa de frutillas', 
@@ -264,7 +269,7 @@ INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria,
    'Queso crema, galletas Oreo, mantequilla, chocolate')
 ON DUPLICATE KEY UPDATE stock = VALUES(stock);
 
--- Productos de categoría: MACARONS
+
 INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria, imagen_url, ingredientes) VALUES
   ('Macarons Mix', 
    'Caja surtida de 12 macarons de diferentes sabores', 
@@ -288,28 +293,28 @@ INSERT INTO Productos (nombre, descripcion, precio, stock, estado, id_categoria,
    'Clara de huevo, azúcar flor, almendra, frambuesa deshidratada')
 ON DUPLICATE KEY UPDATE stock = VALUES(stock);
 
--- -----------------------------------------------------------------------------------------------------
--- 6. DATOS INICIALES - USUARIOS
--- -----------------------------------------------------------------------------------------------------
 
--- Usuario administrador por defecto
-INSERT INTO Usuario (nombre, email, password, rol, estado) VALUES
-  ('Administrador', 'admin@dulcevida.cl', 'admin123', 'ADMINISTRADOR', 'activo')
+
+
+
+
+INSERT INTO Usuario (nombre, email, password, rol, estado, rut, dv, region, comuna) VALUES
+  ('Administrador', 'admin@dulcevida.cl', 'admin123', 'ADMINISTRADOR', 'activo', '11111111', 'K', 'Región Metropolitana de Santiago', 'Santiago')
 ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
 
--- -----------------------------------------------------------------------------------------------------
--- 7. VERIFICACIÓN Y MENSAJES FINALES
--- -----------------------------------------------------------------------------------------------------
 
--- Mostrar resumen de datos insertados
+
+
+
+
 SELECT 
   (SELECT COUNT(*) FROM Categorias) AS 'Categorías',
   (SELECT COUNT(*) FROM Productos) AS 'Productos',
   (SELECT COUNT(*) FROM Usuario) AS 'Usuarios';
 
--- Mensaje de éxito
+
 SELECT '✓ Base de datos inicializada correctamente' AS 'ESTADO';
 
--- ===================================================================================================== 
--- FIN DEL SCRIPT
--- =====================================================================================================
+
+
+

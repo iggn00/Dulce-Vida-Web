@@ -19,7 +19,7 @@ export default function EditDrawer({ title = 'Editar', open = false, onClose, ch
           )}
         </div>
       </div>
-      {/* Backdrop */}
+      {}
       <div className={`edit-drawer-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} aria-hidden={!open} />
     </>
   )

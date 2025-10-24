@@ -55,7 +55,7 @@ public class Producto {
     @Column(columnDefinition = "TEXT")
     private String ingredientes;
     
-    // Lombok annotations to replace getters and setters
+    
 
 
     

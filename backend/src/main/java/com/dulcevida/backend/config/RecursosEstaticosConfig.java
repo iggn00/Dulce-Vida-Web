@@ -13,16 +13,16 @@ import java.nio.file.Path;
 public class RecursosEstaticosConfig implements WebMvcConfigurer {
 
     @Value("${app.uploads.dir:uploads/imagenes_productos}")
-    private String uploadsDir; // ruta física en el sistema de archivos
+    private String uploadsDir; 
 
     @Value("${app.uploads.url-prefix:/uploads/imagenes_productos}")
-    private String urlPrefix; // prefijo público para acceder a los archivos
+    private String urlPrefix; 
 
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        // Normalizar ruta de filesystem
+        
         String fsLocation = Path.of(uploadsDir).toAbsolutePath().toUri().toString();
-        // Normalizar prefijo público (asegurar que comience con "/" y termine con "/**")
+        
         String normalizedPrefix = urlPrefix.startsWith("/") ? urlPrefix : "/" + urlPrefix;
         if (!normalizedPrefix.endsWith("/**")) {
             if (normalizedPrefix.endsWith("/")) {

@@ -46,7 +46,7 @@ export default function ProductosPage() {
             if (categoriaId) params.set('idCategoria', categoriaId)
             return api.get(`/productos/buscar?${params.toString()}`)
           }
-          // Paginado y ordenado
+          
           return api.get('/productos', { params: { page, size, sort } })
         })()
       ])
@@ -58,7 +58,7 @@ export default function ProductosPage() {
       } else {
         const pg = prods.data
         if (Array.isArray(pg)) {
-          // Fallback: si el backend devuelve lista (no Page)
+          
           setProductos(pg)
           setTotalPages(1)
           setTotalElements(pg.length)
@@ -315,7 +315,7 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {/* Modal de edición de producto */}
+      {}
       <Modal title="Editar producto" open={showEdit} onClose={()=>{ setShowEdit(false); setEditId(null) }}
         footer={(
           <>
@@ -345,7 +345,7 @@ export default function ProductosPage() {
         </form>
       </Modal>
 
-      {/* Modal de creación de producto con subida de imagen */}
+      {}
       <Modal title="Crear producto" open={showCreate} onClose={()=> setShowCreate(false)}
         footer={(
           <>

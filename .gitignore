@@ -38,6 +38,12 @@ lib/
 tmp/
 temp/
 
+# Maven build
+backend/target/
+
+# Tooling deps
+tools/node_modules/
+
 
 # TypeScript
 *.tsbuildinfo

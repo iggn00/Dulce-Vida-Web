@@ -3,11 +3,11 @@ import { login as loginService } from '../services/auth.js'
 import { api, authApi } from '../services/http.js'
 
 const AuthContext = createContext(null)
-// Sin localStorage: la sesión vive en el backend vía cookie de sesión
+
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    // Bootstrap rápido desde localStorage para evitar salto a login en refresh
+    
     try {
       const raw = localStorage.getItem('dv.auth.user')
       return raw ? JSON.parse(raw) : null
@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
   const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
-    // Consultar sesión al montar para validar cookie y refrescar datos
+    
     (async () => {
       try {
         const { data } = await authApi.get('/session', { withCredentials: true })
@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
           try { localStorage.removeItem('dv.auth.user') } catch {}
         }
       } catch {
-        // Si la cookie no es válida, limpiar el cache local
+        
         setUser(null)
         try { localStorage.removeItem('dv.auth.user') } catch {}
       } finally {

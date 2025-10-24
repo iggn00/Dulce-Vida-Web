@@ -22,9 +22,9 @@ export default function ProductosPage() {
         getCategories(),
         getProducts()
       ])
-      // cats: [{idCategoria, nombre}]
+      
       setCategories(['Todos', ...cats.map(c => c.nombre)])
-      // prods: [{idProducto, nombre, descripcion, precio, stock, imagenUrl, estado, categoria:{...}, ingredientes}]
+      
       const mapped = prods
         .filter(p => p.estado === 'disponible' && Number(p.stock) > 0)
         .map(p => ({

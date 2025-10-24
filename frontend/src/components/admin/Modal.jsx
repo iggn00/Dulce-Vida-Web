@@ -2,11 +2,11 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 export default function Modal({ open, title, onClose, children, footer }) {
-  // Cerrar con ESC y bloquear scroll del body cuando el modal está abierto
+  
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
     if (open) document.addEventListener('keydown', onKey)
-    // Scroll lock
+    
     const prev = document.body.style.overflow
     if (open) document.body.style.overflow = 'hidden'
     return () => {
@@ -37,6 +37,6 @@ export default function Modal({ open, title, onClose, children, footer }) {
     </div>
   )
 
-  // Renderizar siempre a nivel del body para evitar que el layout de la lista lo afecte
+  
   return root ? createPortal(modalEl, root) : modalEl
 }

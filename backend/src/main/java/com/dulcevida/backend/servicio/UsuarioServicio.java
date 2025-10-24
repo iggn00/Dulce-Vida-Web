@@ -34,31 +34,51 @@ public class UsuarioServicio {
     }
 
     public Usuario crear(Usuario usuario) {
-        // Prevenir duplicados de email
+        
         if (usuarioRepositorio.findByEmail(usuario.getEmail()).isPresent()) {
             throw new DuplicateKeyException("El email ya está registrado");
         }
-        // Establecer rol por defecto si no viene
+        
+        if (usuario.getRut() != null) {
+            usuario.setRut(usuario.getRut().replaceAll("[^0-9]", ""));
+        }
+        if (usuario.getDv() != null) {
+            usuario.setDv(usuario.getDv().trim().toUpperCase());
+        }
+        // Prevenir duplicados de RUT+DV
+        if (usuario.getRut() != null && usuario.getDv() != null) {
+            if (usuarioRepositorio.findByRutAndDv(usuario.getRut(), usuario.getDv()).isPresent()) {
+                throw new DuplicateKeyException("El RUT ya está registrado");
+            }
+        }
+        
         if (usuario.getRol() == null || usuario.getRol().isBlank()) {
             usuario.setRol("USUARIO");
         }
-        // Establecer estado por defecto
+        
         if (usuario.getEstado() == null || usuario.getEstado().isBlank()) {
             usuario.setEstado("activo");
         }
-        // Guardar contraseña en texto plano (sin cifrar)
+        
         usuario.setPassword(usuario.getPassword());
         usuarioRepositorio.save(usuario);
         return usuario;
     }
 
     public Optional<Usuario> actualizar(Integer id, Usuario cambios) {
-        // Validar duplicado de email distinto del usuario actual
+        
         if (cambios.getEmail() != null && !cambios.getEmail().isBlank()) {
             Optional<Usuario> existente = usuarioRepositorio.findByEmail(cambios.getEmail());
             if (existente.isPresent() && !existente.get().getIdUsuario().equals(id)) {
                 throw new DuplicateKeyException("El email ya está registrado por otro usuario");
             }
+        }
+        
+        if (cambios.getRut() != null) {
+            cambios.setRut(cambios.getRut().replaceAll("[^0-9]", ""));
+        }
+        if (cambios.getDv() != null) {
+            cambios.setDv(cambios.getDv().trim().toUpperCase());
         }
         return usuarioRepositorio.findById(Objects.requireNonNull(id)).map(u -> {
             u.setNombre(cambios.getNombre());
@@ -71,6 +91,21 @@ public class UsuarioServicio {
                 u.setEstado(cambios.getEstado());
             }
             u.setRol(cambios.getRol());
+            // Si vienen cambios de RUT/DV/Región/Comuna, validar duplicidad y actualizar
+            if (cambios.getRut() != null && cambios.getDv() != null) {
+                Optional<Usuario> existenteRut = usuarioRepositorio.findByRutAndDv(cambios.getRut(), cambios.getDv());
+                if (existenteRut.isPresent() && !existenteRut.get().getIdUsuario().equals(id)) {
+                    throw new DuplicateKeyException("El RUT ya está registrado por otro usuario");
+                }
+                u.setRut(cambios.getRut());
+                u.setDv(cambios.getDv());
+            }
+            if (cambios.getRegion() != null && !cambios.getRegion().isBlank()) {
+                u.setRegion(cambios.getRegion());
+            }
+            if (cambios.getComuna() != null && !cambios.getComuna().isBlank()) {
+                u.setComuna(cambios.getComuna());
+            }
             usuarioRepositorio.save(u);
             return u;
         });

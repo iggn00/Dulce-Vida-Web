@@ -56,8 +56,8 @@ public class UsuarioControlador {
         Object id = session.getAttribute("usuarioId");
         boolean esAdmin = esAdminPermitido(session);
 
-        // Si no hay sesión (registro público) o el usuario autenticado no es admin,
-        // permitimos crear cuenta pero controlamos el rol según configuración
+        
+        
         if (id == null || !esAdmin) {
             if (usuario.getRol() != null && usuario.getRol().equalsIgnoreCase("ADMINISTRADOR") && !registroPermiteAdmin) {
                 usuario.setRol("USUARIO");
@@ -65,7 +65,7 @@ public class UsuarioControlador {
             return ResponseEntity.ok(usuarioServicio.crear(usuario));
         }
 
-        // Si es admin, puede crear con cualquier rol
+        
         return ResponseEntity.ok(usuarioServicio.crear(usuario));
     }
 

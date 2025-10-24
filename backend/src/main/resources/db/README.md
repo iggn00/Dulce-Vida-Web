@@ -73,5 +73,41 @@ dulcevidadb
 
 ---
 
-**Versión:** 2.0  
-**Última actualización:** 23/10/2025
+---
+
+## 🔄 Migraciones recientes
+
+### v2.1 – Campos RUT/DV, Región y Comuna en Usuario
+
+Se agregaron los campos chilenos al registro de usuario:
+- `rut` (solo dígitos, sin puntos ni guion)
+- `dv` (dígito verificador: 1–9 o K)
+- `region`
+- `comuna`
+
+También se añadió la restricción de unicidad compuesta `UNIQUE (rut, dv)`.
+
+Si ya tienes la base creada y no quieres recrearla, puedes aplicar esta migración manualmente:
+
+```sql
+ALTER TABLE Usuario
+	ADD COLUMN rut VARCHAR(12) NOT NULL,
+	ADD COLUMN dv CHAR(1) NOT NULL,
+	ADD COLUMN region VARCHAR(100) NOT NULL,
+	ADD COLUMN comuna VARCHAR(100) NOT NULL;
+
+-- Normaliza valores iniciales de ejemplo para cuentas existentes (ajusta según tu data)
+UPDATE Usuario SET rut = '11111111', dv = 'K', region = 'Región Metropolitana de Santiago', comuna = 'Santiago' WHERE rut IS NULL OR rut = '';
+
+-- Restringe DV a los valores permitidos y agrega unicidad
+ALTER TABLE Usuario
+	ADD CONSTRAINT chk_usuario_dv CHECK (dv IN ('1','2','3','4','5','6','7','8','9','K')),
+	ADD CONSTRAINT uk_usuario_rut_dv UNIQUE (rut, dv);
+```
+
+> Nota: Si tu servidor MySQL no soporta CHECK, omite la línea del CHECK y valida a nivel de aplicación (ya está implementado en el backend).
+
+---
+
+**Versión:** 2.1  
+**Última actualización:** 24/10/2025

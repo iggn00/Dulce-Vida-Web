@@ -28,7 +28,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAdd, di
           </div>
           <div className="modal-body">
             <div className="row g-4">
-              {/* Imagen del producto */}
+              {}
               <div className="col-md-6">
                 <div className="ratio ratio-4x3 rounded overflow-hidden shadow-sm">
                   <img 
@@ -40,7 +40,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAdd, di
                 </div>
               </div>
 
-              {/* Detalles del producto */}
+              {}
               <div className="col-md-6">
                 <div className="mb-3">
                   <span className="badge bg-secondary mb-2">{product.category || 'Producto'}</span>

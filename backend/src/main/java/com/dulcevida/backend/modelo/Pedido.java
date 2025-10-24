@@ -30,6 +30,6 @@ public class Pedido {
 
     private BigDecimal total = BigDecimal.ZERO;
 
-    // 'pendiente', 'en_preparacion', 'en_camino', 'entregado', 'cancelado'
+    
     private String estado = "pendiente";
 }

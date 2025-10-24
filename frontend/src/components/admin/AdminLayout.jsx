@@ -3,9 +3,9 @@ import { NavLink, Outlet, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 
 export default function AdminLayout({ title }) {
-  const [open, setOpen] = useState(false) // móvil: overlay
-  const [collapsed, setCollapsed] = useState(true) // rail mini por defecto
-  const [hovering, setHovering] = useState(false) // expandir al pasar el mouse (desktop)
+  const [open, setOpen] = useState(false) 
+  const [collapsed, setCollapsed] = useState(true) 
+  const [hovering, setHovering] = useState(false) 
   const { user, logout } = useAuth()
   const location = useLocation()
 
@@ -19,7 +19,7 @@ export default function AdminLayout({ title }) {
   const toggleMobile = () => setOpen(v => !v)
   const toggleCollapse = () => setCollapsed(v => !v)
 
-  // Señalamos al body que estamos en el panel admin (para estilos globales seguros)
+  
   useEffect(() => {
     document.body.classList.add('is-admin')
     return () => { document.body.classList.remove('is-admin') }
@@ -27,7 +27,7 @@ export default function AdminLayout({ title }) {
 
   return (
   <div className={`admin-shell ${collapsed ? 'is-collapsed is-mini' : ''} ${hovering ? 'is-hover' : ''}`}>
-      {/* Backdrop para móvil */}
+      {}
       <div
         className={`admin-backdrop ${open ? 'is-open' : ''}`}
         onClick={() => setOpen(false)}
@@ -82,7 +82,7 @@ export default function AdminLayout({ title }) {
         <header className="admin-topbar">
           <div className="admin-container d-flex align-items-center justify-content-between gap-2">
           <div className="left">
-            {/* Mostrar hamburguesa hasta < lg (991px) y el botón de colapsar desde lg */}
+            {}
             <button className="btn btn-icon d-lg-none" type="button" onClick={toggleMobile} aria-label="Abrir menú" aria-expanded={open}>☰</button>
             <button className="btn btn-icon d-none d-lg-inline-flex" type="button" onClick={toggleCollapse} aria-label="Colapsar barra">≡</button>
             <div className="page-headings">
@@ -109,7 +109,7 @@ export default function AdminLayout({ title }) {
         </main>
       </div>
 
-      {/* FAB deshabilitado para evitar duplicar toggles */}
+      {}
     </div>
   )
 }

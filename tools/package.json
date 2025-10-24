@@ -1,0 +1,11 @@
+{
+  "name": "dulce-vida-tools",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Herramientas auxiliares para el repo Dulce-Vida-Web",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "strip-comments": "^2.0.1",
+    "strip-css-comments": "^5.0.0"
+  }
+}

@@ -31,13 +31,13 @@ public class CarritoServicio {
     }
 
     private String guestEmail(HttpSession session) {
-        // Genera un email único por sesión para clientes invitados
+        
         String sid = session.getId();
         return "guest-" + sid + "@guest.local";
     }
 
     private Cliente clienteDeSesion(HttpSession session) {
-        // Si hay usuario autenticado, usar/crear su Cliente
+        
         Optional<Usuario> uopt = usuarioActual(session);
         if (uopt.isPresent()) {
             Usuario u = uopt.get();
@@ -49,7 +49,7 @@ public class CarritoServicio {
                 return clienteRepositorio.save(c);
             });
         }
-        // Invitado: usar/crear un cliente basado en la sesión
+        
         String gEmail = guestEmail(session);
         return clienteRepositorio.findByEmail(gEmail).orElseGet(() -> {
             Cliente c = new Cliente();
@@ -90,7 +90,7 @@ public class CarritoServicio {
             it.put("idDetalle", d.getIdDetalle());
             it.put("cantidad", d.getCantidad());
             it.put("precioUnitario", d.getPrecioUnitario());
-            // Map.of no admite valores null; usamos HashMap para permitir imagenUrl/descripcion nulos
+            
             Map<String, Object> pMap = new HashMap<>();
             if (p != null) {
                 pMap.put("idProducto", p.getIdProducto());
@@ -132,7 +132,7 @@ public class CarritoServicio {
                 });
         int actual = Optional.ofNullable(det.getCantidad()).orElse(0);
         int nuevo = actual + cantidad;
-        // Capear por stock disponible
+        
         if (stock >= 0)
             nuevo = Math.min(nuevo, stock);
         det.setCantidad(nuevo);
@@ -157,12 +157,12 @@ public class CarritoServicio {
     public Map<String, Object> actualizarCantidad(HttpSession session, Integer idDetalle, Integer cantidad) {
         Objects.requireNonNull(idDetalle);
         if (cantidad == null || cantidad <= 0) {
-            // Si la cantidad es 0 o inválida, eliminar el ítem
+            
             detallePedidoRepositorio.deleteById(idDetalle);
             return obtenerCarrito(session);
         }
         DetallePedido det = detallePedidoRepositorio.findById(idDetalle).orElseThrow();
-        // Opcional: limitar por stock disponible si existe
+        
         Producto p = det.getProducto();
         Integer stock = p != null ? p.getStock() : null;
         int finalQty = cantidad;
@@ -183,16 +183,16 @@ public class CarritoServicio {
         if (detalles.isEmpty()) {
             throw new IllegalArgumentException("El carrito está vacío");
         }
-        // Recalcular total por seguridad
+        
         BigDecimal total = detalles.stream()
                 .map(d -> d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         pedido.setTotal(total);
-        // Simulación de pago
+        
         String paymentId = UUID.randomUUID().toString();
         String paymentMethod = "simulado";
         String status = "aprobado";
-        // Actualizar stock de cada producto y estado si se agota
+        
         for (DetallePedido d : detalles) {
             Producto prod = d.getProducto();
             if (prod != null) {
@@ -207,12 +207,12 @@ public class CarritoServicio {
                 productoRepositorio.save(prod);
             }
         }
-        // Confirmar pedido
+        
         pedido.setEstado("confirmado");
         pedidoRepositorio.save(pedido);
 
-        // Al consultar nuevamente el carrito se creará uno nuevo (pendiente) si se
-        // necesita
+        
+        
         Map<String, Object> pago = new HashMap<>();
         pago.put("paymentId", paymentId);
         pago.put("status", status);

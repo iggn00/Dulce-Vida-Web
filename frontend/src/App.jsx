@@ -48,7 +48,7 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
       <Routes>
-        {/* Rutas públicas con Navbar/Footer */}
+        {}
         <Route path="/" element={<Layout />}> 
           <Route index element={<HomePage />} />
           <Route path="productos" element={<ProductosPage />} />
@@ -59,7 +59,7 @@ export default function App() {
           <Route path="carrito" element={<CartPage />} />
         </Route>
 
-        {/* Panel de administración FULL (sin Navbar/Footer públicos) */}
+        {}
         <Route path="/admin" element={<ProtectedRoute requiredRoles={["ADMINISTRADOR"]} />}> 
           <Route element={<AdminLayoutShell title="Panel" />}> 
             <Route index element={<Navigate to="dashboard" replace />} />

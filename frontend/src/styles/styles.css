@@ -5,7 +5,7 @@
 @import url('./components/products.css');
 @import url('./components/forms.css');
 @import url('./components/admin.css');
-/* Estilos base adaptados del proyecto original */
+
 :root {
   --bs-body-bg: var(--crema);
   --bs-body-color: #2f1d1b;
@@ -20,15 +20,15 @@
 html, body { height: 100%; margin: 0; }
 body { background-color: var(--bs-body-bg); color: var(--bs-body-color); }
 body { display: flex; flex-direction: column; min-height: 100vh; }
-/* Compensación para navbar fixed-top (solo para el sitio público) */
+
 body { padding-top: 56px; }
 @media (min-width: 768px) { body { padding-top: 64px; } }
-/* Cuando está presente el panel admin, no necesitamos esa compensación */
+
 body:has(.admin-shell), body.is-admin { padding-top: 0 !important; }
 main { flex: 1 0 auto; }
 footer { flex-shrink: 0; }
 
-/* Utilidades */
+
 .bg-cacao { background-color: var(--cacao) !important; }
 .bg-crema { background-color: var(--crema) !important; }
 .bg-rosa { background-color: var(--rosa) !important; }
@@ -38,14 +38,14 @@ footer { flex-shrink: 0; }
 .text-rosa { color: var(--rosa) !important; }
 .text-oro { color: var(--oro) !important; }
 
-/* Navbar */
+
 .navbar.navbar-dark.bg-dark { background-color: var(--cacao) !important; }
 .navbar-dark .navbar-brand, .navbar-dark .navbar-nav .nav-link { color: var(--blanco); opacity: 0.9; }
 .navbar-dark .navbar-nav .nav-link:hover, .navbar-dark .navbar-nav .nav-link:focus {
   color: var(--crema); opacity: 1;
 }
 
-/* Botones */
+
 .btn-primary {
   --bs-btn-bg: var(--oro);
   --bs-btn-border-color: var(--oro);
@@ -74,14 +74,14 @@ footer { flex-shrink: 0; }
   --bs-btn-active-border-color: #8f664a;
 }
 
-/* Footer */
+
 footer { color: #f7eada; }
 .titulo-pie { color: var(--crema); }
 .enlace-pie { color: #f7eada; text-decoration: none; }
 .enlace-pie:hover { color: #fff; text-decoration: underline; }
 .footer-input { background-color: #fff; }
 
-/* Productos */
+
 .tarjeta-producto { 
   border: 1px solid rgba(0,0,0,0.06); 
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -92,12 +92,12 @@ footer { color: #f7eada; }
 }
 .imagen-producto img { display: block; width: 100%; height: auto; object-fit: cover; }
 
-/* Modal de detalle de producto */
+
 .text-dorado {
   color: var(--oro) !important;
 }
 
-/* Hero de home */
+
 #hero .hero-img { display: block; width: 100%; height: auto; object-fit: contain; }
 @media (min-width: 992px) { #hero .hero-img { object-fit: contain; max-height: 380px; } }
 .img-focus-left { object-position: left center !important; object-fit: cover; }

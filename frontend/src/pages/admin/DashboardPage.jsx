@@ -94,7 +94,7 @@ function HeroCard({ to, variant = 'violeta', icon, title, subtitle, value }){
     </a>
   )}
 
-// Versión SPA: usa NavLink para no recargar la página ni perder la sesión
+
 function HeroNavCard({ to, variant = 'violeta', icon, title, subtitle, value }){
   const target = Math.max(0, Number(value) || 0)
   return (

@@ -19,7 +19,7 @@ export default function LoginPage() {
     }
     else {
       const m = res?.message
-      // Mapear mensaje específico cuando la cuenta está inactiva/bloqueada
+      
       if (m && /inactivo|bloquead|inhabilit/i.test(m)) setError('Tu cuenta ha sido inhabilitada')
       else setError(m || 'Credenciales inválidas')
     }

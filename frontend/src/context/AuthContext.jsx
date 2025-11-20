@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { login as loginService } from '../services/auth.js'
-import { api, authApi } from '../services/http.js'
+import { api, authApi, getStoredToken } from '../services/http.js'
 
-const AuthContext = createContext(null)
+export const AuthContext = createContext(null)
 
 
 export function AuthProvider({ children }) {
@@ -16,10 +16,11 @@ export function AuthProvider({ children }) {
   const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
-    
+    const token = getStoredToken()
+    if (!token) { setInitialized(true); return }
     (async () => {
       try {
-        const { data } = await authApi.get('/session', { withCredentials: true })
+        const { data } = await authApi.get('/session', { headers: { Authorization: 'Bearer ' + token } })
         if (data?.id_usuario) {
           const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }
           setUser(u)
@@ -29,7 +30,6 @@ export function AuthProvider({ children }) {
           try { localStorage.removeItem('dv.auth.user') } catch {}
         }
       } catch {
-        
         setUser(null)
         try { localStorage.removeItem('dv.auth.user') } catch {}
       } finally {
@@ -42,6 +42,7 @@ export function AuthProvider({ children }) {
     try {
       const data = await loginService(email, password)
       if (data?.exito) {
+        if (data.token) { try { localStorage.setItem('dv.auth.token', data.token) } catch {} }
         const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }
         setUser(u)
         try { localStorage.setItem('dv.auth.user', JSON.stringify(u)) } catch {}
@@ -58,7 +59,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null)
     try { localStorage.removeItem('dv.auth.user') } catch {}
-    authApi.post('/logout', {}, { withCredentials: true }).catch(()=>{})
+    try { localStorage.removeItem('dv.auth.token') } catch {}
   }
 
   const value = useMemo(() => ({ user, isAuthenticated: !!user, initialized, login, logout }), [user, initialized])

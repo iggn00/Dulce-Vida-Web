@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.util.Optional;
@@ -21,6 +22,9 @@ public class UsuarioServicioTest {
     @Mock
     private UsuarioRepositorio usuarioRepositorio;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UsuarioServicio usuarioServicio;
 
@@ -33,6 +37,9 @@ public class UsuarioServicioTest {
             var repoField = UsuarioServicio.class.getDeclaredField("usuarioRepositorio");
             repoField.setAccessible(true);
             repoField.set(usuarioServicio, usuarioRepositorio);
+            var encField = UsuarioServicio.class.getDeclaredField("passwordEncoder");
+            encField.setAccessible(true);
+            encField.set(usuarioServicio, passwordEncoder);
         } catch (Exception ignored) {}
 
         usuario = new Usuario();
@@ -45,10 +52,12 @@ public class UsuarioServicioTest {
     }
 
     @Test
-    void crear_debeMantenerPasswordPlano() {
+    void crear_debeCifrarPasswordBCrypt() {
         when(usuarioRepositorio.findByEmail("admin@dulcevida.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("admin123")).thenReturn("$2a$FakeHashEncodedPassword123456789012345678901234");
         Usuario creado = usuarioServicio.crear(usuario);
-        assertEquals("admin123", creado.getPassword());
+        assertNotEquals("admin123", creado.getPassword());
+        assertTrue(creado.getPassword().startsWith("$2a$") || creado.getPassword().startsWith("$2b$"));
     }
 
     @Test

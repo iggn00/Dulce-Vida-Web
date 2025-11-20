@@ -1,9 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api, baseURL } from '../services/http.js'
+import { useAuth } from './AuthContext.jsx'
 
 const CartContext = createContext(null)
 
 export function CartProvider({ children }) {
+  const { user } = useAuth()
+
+  const keyForUser = (u) => (u && u.id ? `dv.cart.${u.id}` : null)
+
   const [items, setItems] = useState([])
   const [total, setTotal] = useState(0)
 
@@ -26,13 +31,31 @@ export function CartProvider({ children }) {
   }
 
   const refresh = async () => {
+    const key = keyForUser(user)
+    if (!user || !key) { setItems([]); setTotal(0); return }
     try {
       const { data } = await api.get('/cart', { withCredentials: true })
       mapServerCart(data)
-    } catch {}
+      try { localStorage.setItem(key, JSON.stringify({ items: data?.items || [], total: data?.total || 0 })) } catch {}
+    } catch {
+      // Si el backend falla, al menos intentamos recuperar del localStorage
+      try {
+        const raw = localStorage.getItem(key)
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          const its = (parsed.items || []).map(it => ({ ...it }))
+          setItems(its)
+          setTotal(Number(parsed.total || 0))
+        } else {
+          setItems([]); setTotal(0)
+        }
+      } catch {
+        setItems([]); setTotal(0)
+      }
+    }
   }
 
-  useEffect(() => { refresh() }, [])
+  useEffect(() => { refresh() }, [user])
 
   const addItem = async (product, cantidad = 1) => {
     
@@ -52,6 +75,8 @@ export function CartProvider({ children }) {
     try {
       const { data } = await api.post('/cart/add', { idProducto: product.id, cantidad: cantidadAAgregar }, { withCredentials: true })
       mapServerCart(data)
+      const key = keyForUser(user)
+      if (key) { try { localStorage.setItem(key, JSON.stringify({ items: data?.items || [], total: data?.total || 0 })) } catch {} }
     } catch (e) {
       const msg = e?.response?.data?.error
       if (msg) alert(msg)
@@ -76,6 +101,8 @@ export function CartProvider({ children }) {
     try {
       const { data } = await api.patch(`/cart/item/${found.idDetalle}`, { cantidad: nextQty }, { withCredentials: true })
       mapServerCart(data)
+      const key = keyForUser(user)
+      if (key) { try { localStorage.setItem(key, JSON.stringify({ items: data?.items || [], total: data?.total || 0 })) } catch {} }
     } catch (e) {
       
       console.error('No se pudo actualizar la cantidad', e?.response?.data || e.message)
@@ -89,12 +116,16 @@ export function CartProvider({ children }) {
     try {
       const { data } = await api.delete(`/cart/item/${found.idDetalle}`, { withCredentials: true })
       mapServerCart(data)
+      const key = keyForUser(user)
+      if (key) { try { localStorage.setItem(key, JSON.stringify({ items: data?.items || [], total: data?.total || 0 })) } catch {} }
     } catch {}
   }
   const clear = async () => {
     try {
       const { data } = await api.delete('/cart/clear', { withCredentials: true })
       mapServerCart(data)
+      const key = keyForUser(user)
+      if (key) { try { localStorage.removeItem(key) } catch {} }
     } catch {}
   }
   const checkout = async () => {

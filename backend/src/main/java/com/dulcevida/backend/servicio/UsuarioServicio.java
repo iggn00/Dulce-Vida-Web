@@ -5,6 +5,7 @@ import com.dulcevida.backend.repositorio.UsuarioRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +16,9 @@ public class UsuarioServicio {
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     public List<Usuario> listar() {
@@ -60,7 +64,8 @@ public class UsuarioServicio {
             usuario.setEstado("activo");
         }
         
-        usuario.setPassword(usuario.getPassword());
+        // Cifrar contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuarioRepositorio.save(usuario);
         return usuario;
     }
@@ -84,8 +89,7 @@ public class UsuarioServicio {
             u.setNombre(cambios.getNombre());
             u.setEmail(cambios.getEmail());
             if (cambios.getPassword() != null && !cambios.getPassword().isBlank()) {
-                // Actualizar en texto plano (sin cifrar)
-                u.setPassword(cambios.getPassword());
+                u.setPassword(passwordEncoder.encode(cambios.getPassword()));
             }
             if (cambios.getEstado() != null && !cambios.getEstado().isBlank()) {
                 u.setEstado(cambios.getEstado());

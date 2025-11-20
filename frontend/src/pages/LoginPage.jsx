@@ -8,9 +8,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function onSubmit(e) {
     e.preventDefault()
+    if (loading) return
+    setError('')
+    setLoading(true)
     const res = await login(email, password)
     if (res?.ok) {
       const u = res.user || user
@@ -22,13 +26,15 @@ export default function LoginPage() {
       
       if (m && /inactivo|bloquead|inhabilit/i.test(m)) setError('Tu cuenta ha sido inhabilitada')
       else setError(m || 'Credenciales inválidas')
+      setLoading(false)
     }
+    
   }
 
   return (
     <div className="row justify-content-center">
       <div className="col-12 col-md-6 col-lg-4">
-        <h1 className="h4 mb-3">Iniciar sesión</h1>
+        <h1 className="h4 mb-3 text-center">Iniciar sesión</h1>
         {error && <div className="alert alert-danger py-2 mb-3">{error}</div>}
         <form className="card p-3" onSubmit={onSubmit}>
           <div className="mb-3">
@@ -40,7 +46,9 @@ export default function LoginPage() {
             <input type="password" className="form-control" value={password} onChange={(e)=>setPassword(e.target.value)} required />
           </div>
           <div className="d-flex justify-content-end">
-            <button type="submit" className="btn btn-dorado">Entrar</button>
+            <button type="submit" className="btn btn-dorado" disabled={loading}>
+              {loading ? 'Ingresando...' : 'Entrar'}
+            </button>
           </div>
         </form>
       </div>

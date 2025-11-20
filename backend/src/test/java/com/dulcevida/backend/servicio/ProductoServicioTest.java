@@ -3,6 +3,7 @@ package com.dulcevida.backend.servicio;
 import com.dulcevida.backend.modelo.Categoria;
 import com.dulcevida.backend.modelo.Producto;
 import com.dulcevida.backend.repositorio.ProductoRepositorio;
+import com.dulcevida.backend.repositorio.CategoriaRepositorio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,9 @@ public class ProductoServicioTest {
 
     @Mock
     private ProductoRepositorio productoRepositorio;
+
+    @Mock
+    private CategoriaRepositorio categoriaRepositorio;
 
     @InjectMocks
     private ProductoServicio productoServicio;
@@ -56,6 +60,7 @@ public class ProductoServicioTest {
 
     @Test
     void crear_debeGuardarProducto() {
+        when(categoriaRepositorio.findById(1)).thenReturn(Optional.of(categoria));
         Producto creado = productoServicio.crear(producto);
         assertEquals("Torta de Chocolate", creado.getNombre());
         assertEquals("disponible", creado.getEstado());
@@ -77,6 +82,7 @@ public class ProductoServicioTest {
         cambios.setEstado("disponible");
 
         when(productoRepositorio.findById(1)).thenReturn(Optional.of(producto));
+        when(categoriaRepositorio.findById(2)).thenReturn(Optional.of(nuevaCat));
         Optional<Producto> actualizado = productoServicio.actualizar(1, cambios);
         assertTrue(actualizado.isPresent());
         assertEquals("Torta de Vainilla", actualizado.get().getNombre());
@@ -90,5 +96,21 @@ public class ProductoServicioTest {
         Optional<Producto> inhabilitado = productoServicio.inhabilitar(1);
         assertTrue(inhabilitado.isPresent());
         assertEquals("agotado", inhabilitado.get().getEstado());
+    }
+
+    @Test
+    void crear_debeFallarSiCategoriaInexistente() {
+        when(categoriaRepositorio.findById(1)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> productoServicio.crear(producto));
+    }
+
+    @Test
+    void actualizar_debeFallarSiCategoriaNuevaNoExiste() {
+        when(productoRepositorio.findById(1)).thenReturn(Optional.of(producto));
+        Categoria otra = new Categoria();
+        otra.setIdCategoria(99);
+        Producto cambios = new Producto();
+        cambios.setCategoria(otra);
+        assertThrows(IllegalArgumentException.class, () -> productoServicio.actualizar(1, cambios));
     }
 }

@@ -17,9 +17,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
+	@org.springframework.beans.factory.annotation.Value("${app.security.bcrypt.strength:11}")
+	private int bcryptStrength;
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+		return new BCryptPasswordEncoder(bcryptStrength);
 	}
 
 	@Bean
@@ -34,7 +37,8 @@ public class SecurityConfig {
 			.cors(cors -> {})
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/auth/login", "/auth/register", "/auth/session", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+				.requestMatchers("/auth/login", "/auth/register", "/auth/session",
+						"/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/docs/**").permitAll()
 				.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/productos/**").permitAll()
 				.requestMatchers("/api/productos/**").hasRole("ADMINISTRADOR")
 				.anyRequest().authenticated()
@@ -42,4 +46,5 @@ public class SecurityConfig {
 			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
+
 }

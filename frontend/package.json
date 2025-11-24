@@ -8,7 +8,7 @@
     "build": "vite build",
     "build:full": "vite build",
     "lint": "eslint .",
-    "test": "vitest",
+    "test": "vitest --environment=jsdom",
     "preview": "vite preview"
   },
   "dependencies": {

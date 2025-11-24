@@ -129,4 +129,17 @@ public class UsuarioServicio {
             return u;
         });
     }
+
+    public Optional<Usuario> cambiarPassword(Integer id, String actual, String nueva){
+        if (actual == null || nueva == null) return Optional.empty();
+        if (nueva.length() < 8) return Optional.empty();
+        return usuarioRepositorio.findById(Objects.requireNonNull(id)).flatMap(u -> {
+            if (!passwordEncoder.matches(actual, u.getPassword())) {
+                return Optional.empty();
+            }
+            u.setPassword(passwordEncoder.encode(nueva));
+            usuarioRepositorio.save(u);
+            return Optional.of(u);
+        });
+    }
 }

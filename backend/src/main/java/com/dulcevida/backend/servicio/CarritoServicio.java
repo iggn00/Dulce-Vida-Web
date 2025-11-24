@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +24,23 @@ public class CarritoServicio {
     private ProductoRepositorio productoRepositorio;
     @Autowired
     private UsuarioServicio usuarioServicio;
+    @Autowired
+    private BoletaRepositorio boletaRepositorio;
+    @Autowired
+    private DetalleBoletaRepositorio detalleBoletaRepositorio;
 
     private Optional<Usuario> usuarioActual(HttpSession session) {
+        // Primero intentar obtener desde el contexto de seguridad JWT
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getName() != null) {
+            return usuarioServicio.buscarPorEmail(auth.getName());
+        }
+        // Fallback a sesión (establecida en login para compatibilidad)
         Object id = session.getAttribute("usuarioId");
-        if (id == null)
-            return Optional.empty();
-        return usuarioServicio.buscarPorId((Integer) id);
+        if (id != null) {
+            return usuarioServicio.buscarPorId((Integer) id);
+        }
+        return Optional.empty();
     }
 
     private String guestEmail(HttpSession session) {
@@ -211,6 +224,34 @@ public class CarritoServicio {
         pedido.setEstado("confirmado");
         pedidoRepositorio.save(pedido);
 
+        // Generar boleta correlativa
+        BigDecimal subtotal = total;
+        BigDecimal iva = subtotal.multiply(new BigDecimal("0.19"));
+        BigDecimal totalConIva = subtotal.add(iva);
+        Long numero = 1L;
+        Boleta ultima = boletaRepositorio.findFirstByOrderByNumeroDesc();
+        if (ultima != null && ultima.getNumero() != null) {
+            numero = ultima.getNumero() + 1;
+        }
+        Boleta boleta = new Boleta();
+        boleta.setNumero(numero);
+        boleta.setPedido(pedido);
+        boleta.setSubtotal(subtotal);
+        boleta.setIva(iva);
+        boleta.setTotal(totalConIva);
+        boletaRepositorio.save(boleta);
+
+        for (DetallePedido d : detalles) {
+            DetalleBoleta db = new DetalleBoleta();
+            db.setBoleta(boleta);
+            db.setProducto(d.getProducto());
+            db.setCantidad(d.getCantidad());
+            db.setPrecioUnitario(d.getPrecioUnitario());
+            BigDecimal linea = d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()));
+            db.setTotalLinea(linea);
+            detalleBoletaRepositorio.save(db);
+        }
+
         
         
         Map<String, Object> pago = new HashMap<>();
@@ -220,10 +261,13 @@ public class CarritoServicio {
         pago.put("paidAt", new Date());
 
         return Map.of(
-                "pedidoId", pedido.getIdPedido(),
-                "estado", pedido.getEstado(),
-                "total", total,
-                "items", detalles.size(),
-                "pago", pago);
+            "pedidoId", pedido.getIdPedido(),
+            "estado", pedido.getEstado(),
+            "subtotal", subtotal,
+            "iva", iva,
+            "total", totalConIva,
+            "boletaNumero", boleta.getNumero(),
+            "items", detalles.size(),
+            "pago", pago);
     }
 }

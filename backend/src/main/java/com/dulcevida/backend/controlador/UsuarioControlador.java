@@ -1,6 +1,8 @@
 package com.dulcevida.backend.controlador;
 
 import com.dulcevida.backend.modelo.Usuario;
+import com.dulcevida.backend.dto.UsuarioDTO;
+import com.dulcevida.backend.dto.UsuarioMapper;
 import com.dulcevida.backend.servicio.UsuarioServicio;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -35,20 +37,20 @@ public class UsuarioControlador {
     @GetMapping
     public ResponseEntity<?> listar(HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
-        return ResponseEntity.ok(usuarioServicio.listar());
+        return ResponseEntity.ok(usuarioServicio.listar().stream().map(UsuarioMapper::toDTO).toList());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Integer id, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
         Optional<Usuario> opt = usuarioServicio.buscarPorId(id);
-        return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return opt.<ResponseEntity<?>>map(u -> ResponseEntity.ok(UsuarioMapper.toDTO(u))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/buscar")
     public ResponseEntity<?> buscar(@RequestParam("q") @NotBlank String texto, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
-        return ResponseEntity.ok(usuarioServicio.buscarPorTexto(texto));
+        return ResponseEntity.ok(usuarioServicio.buscarPorTexto(texto).stream().map(UsuarioMapper::toDTO).toList());
     }
 
     @PostMapping
@@ -62,18 +64,18 @@ public class UsuarioControlador {
             if (usuario.getRol() != null && usuario.getRol().equalsIgnoreCase("ADMINISTRADOR") && !registroPermiteAdmin) {
                 usuario.setRol("USUARIO");
             }
-            return ResponseEntity.ok(usuarioServicio.crear(usuario));
+            return ResponseEntity.ok(UsuarioMapper.toDTO(usuarioServicio.crear(usuario)));
         }
 
         
-        return ResponseEntity.ok(usuarioServicio.crear(usuario));
+        return ResponseEntity.ok(UsuarioMapper.toDTO(usuarioServicio.crear(usuario)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody Usuario cambios, HttpSession session) {
         if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
         Optional<Usuario> opt = usuarioServicio.actualizar(id, cambios);
-        return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return opt.<ResponseEntity<?>>map(u -> ResponseEntity.ok(UsuarioMapper.toDTO(u))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
@@ -88,7 +90,18 @@ public class UsuarioControlador {
         if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
         String estado = body != null ? body.get("estado") : null;
         return usuarioServicio.actualizarEstado(id, estado)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
+            .<ResponseEntity<?>>map(u -> ResponseEntity.ok(UsuarioMapper.toDTO(u)))
                 .orElseGet(() -> ResponseEntity.badRequest().body(java.util.Map.of("error","Estado inválido")));
+    }
+
+    @PostMapping("/{id}/password")
+    public ResponseEntity<?> cambiarPassword(@PathVariable Integer id, @RequestBody java.util.Map<String,String> body, HttpSession session){
+        Object sid = session.getAttribute("usuarioId");
+        if (sid == null || !sid.equals(id)) return ResponseEntity.status(403).body("No autorizado");
+        String actual = body != null ? body.get("actual") : null;
+        String nueva = body != null ? body.get("nueva") : null;
+        return usuarioServicio.cambiarPassword(id, actual, nueva)
+                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(java.util.Map.of("exito", true)))
+                .orElseGet(() -> ResponseEntity.badRequest().body(java.util.Map.of("error","Password inválido o no coincide")));
     }
 }

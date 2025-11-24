@@ -302,6 +302,50 @@ INSERT INTO Usuario (nombre, email, password, rol, estado, rut, dv, region, comu
   ('Administrador', 'admin@dulcevida.cl', 'admin123', 'ADMINISTRADOR', 'activo', '11111111', 'K', 'Región Metropolitana de Santiago', 'Santiago')
 ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
 
+-- Actualizar password admin a hash BCrypt (costo 11) si sigue en texto plano
+UPDATE Usuario SET password = '$2a$11$u9q1xEw1Y4G9UO1O/77hLuNqjYqSdz8CA0nV..OZXS6jttuPAo9l6' WHERE email='admin@dulcevida.cl' AND password='admin123';
+
+-- Tablas adicionales (si no existen) para boletas y refresh tokens
+CREATE TABLE IF NOT EXISTS Refresh_Token (
+  id_refresh BIGINT AUTO_INCREMENT PRIMARY KEY,
+  token VARCHAR(200) NOT NULL UNIQUE,
+  id_usuario INT NOT NULL,
+  expira_en DATETIME NOT NULL,
+  revocado TINYINT(1) NOT NULL DEFAULT 0,
+  CONSTRAINT fk_refresh_usuario FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX idx_token (token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS Boleta (
+  id_boleta INT AUTO_INCREMENT PRIMARY KEY,
+  numero BIGINT UNIQUE,
+  id_pedido INT NOT NULL,
+  fecha_emision DATETIME DEFAULT CURRENT_TIMESTAMP,
+  subtotal DECIMAL(10,2) NOT NULL,
+  iva DECIMAL(10,2) NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  CONSTRAINT fk_boleta_pedido FOREIGN KEY (id_pedido) REFERENCES Pedidos(id_pedido) ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX idx_numero (numero)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS Detalle_Boleta (
+  id_detalle_boleta INT AUTO_INCREMENT PRIMARY KEY,
+  id_boleta INT NOT NULL,
+  id_producto INT NOT NULL,
+  cantidad INT NOT NULL CHECK (cantidad > 0),
+  precio_unitario DECIMAL(10,2) NOT NULL CHECK (precio_unitario >= 0),
+  total_linea DECIMAL(10,2) NOT NULL CHECK (total_linea >= 0),
+  CONSTRAINT fk_detalle_boleta FOREIGN KEY (id_boleta) REFERENCES Boleta(id_boleta) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_detalle_boleta_producto FOREIGN KEY (id_producto) REFERENCES Productos(id_producto) ON DELETE RESTRICT ON UPDATE CASCADE,
+  INDEX idx_boleta (id_boleta)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Datos demo de boleta
+INSERT IGNORE INTO Clientes (nombre,email) VALUES ('Cliente Demo','cliente@demo.cl');
+INSERT IGNORE INTO Pedidos (id_cliente, estado, total) VALUES ((SELECT id_cliente FROM Clientes WHERE email='cliente@demo.cl'),'confirmado',19990);
+SET @pid = (SELECT id_pedido FROM Pedidos ORDER BY id_pedido DESC LIMIT 1);
+INSERT IGNORE INTO Boleta (numero,id_pedido,subtotal,iva,total) VALUES (1,@pid,16840,3200,20040);
+
 
 
 

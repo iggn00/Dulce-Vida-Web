@@ -38,12 +38,12 @@ export default function LoginPage() {
         {error && <div className="alert alert-danger py-2 mb-3">{error}</div>}
         <form className="card p-3" onSubmit={onSubmit}>
           <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input type="email" className="form-control" value={email} onChange={(e)=>setEmail(e.target.value)} required />
+            <label htmlFor="loginEmail" className="form-label">Email</label>
+            <input id="loginEmail" name="email" type="email" className="form-control" value={email} onChange={(e)=>setEmail(e.target.value)} required />
           </div>
           <div className="mb-3">
-            <label className="form-label">Contraseña</label>
-            <input type="password" className="form-control" value={password} onChange={(e)=>setPassword(e.target.value)} required />
+            <label htmlFor="loginPassword" className="form-label">Contraseña</label>
+            <input id="loginPassword" name="password" type="password" className="form-control" value={password} onChange={(e)=>setPassword(e.target.value)} required />
           </div>
           <div className="d-flex justify-content-end">
             <button type="submit" className="btn btn-dorado" disabled={loading}>

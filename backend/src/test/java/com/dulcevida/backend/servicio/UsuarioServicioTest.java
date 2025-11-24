@@ -90,4 +90,16 @@ public class UsuarioServicioTest {
         when(usuarioRepositorio.findByEmail("nuevo@dulcevida.com")).thenReturn(Optional.of(otro));
         assertThrows(DuplicateKeyException.class, () -> usuarioServicio.actualizar(1, cambios));
     }
+
+    @Test
+    void cambiarPassword_debeCifrarNuevaYValidarActual() {
+        when(usuarioRepositorio.findById(1)).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("admin123", usuario.getPassword())).thenReturn(true);
+        when(passwordEncoder.encode("nuevaSegura123"))
+                .thenReturn("$2a$OtraHashPasswordMuySeguraXXXXXXXXXXXXXXXXXXXX");
+        Optional<Usuario> cambiado = usuarioServicio.cambiarPassword(1, "admin123", "nuevaSegura123");
+        assertTrue(cambiado.isPresent());
+        assertNotEquals("admin123", cambiado.get().getPassword());
+        assertTrue(cambiado.get().getPassword().startsWith("$2a$") || cambiado.get().getPassword().startsWith("$2b$"));
+    }
 }

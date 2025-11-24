@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { login as loginService } from '../services/auth.js'
-import { api, authApi, getStoredToken } from '../services/http.js'
+import { api, authApi, getStoredToken, getStoredRefreshToken, storeTokens } from '../services/http.js'
 
 export const AuthContext = createContext(null)
 
@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
     try {
       const data = await loginService(email, password)
       if (data?.exito) {
-        if (data.token) { try { localStorage.setItem('dv.auth.token', data.token) } catch {} }
+        storeTokens(data.token, data.refreshToken)
         const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }
         setUser(u)
         try { localStorage.setItem('dv.auth.user', JSON.stringify(u)) } catch {}
@@ -60,6 +60,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     try { localStorage.removeItem('dv.auth.user') } catch {}
     try { localStorage.removeItem('dv.auth.token') } catch {}
+    try { localStorage.removeItem('dv.auth.refresh') } catch {}
   }
 
   const value = useMemo(() => ({ user, isAuthenticated: !!user, initialized, login, logout }), [user, initialized])

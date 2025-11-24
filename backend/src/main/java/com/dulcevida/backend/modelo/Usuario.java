@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "Usuario")
@@ -32,6 +33,7 @@ public class Usuario {
 
     @NotBlank
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password; 
 
     @NotBlank

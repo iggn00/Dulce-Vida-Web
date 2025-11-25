@@ -1,71 +1,78 @@
 package com.dulcevida.backend.modelo;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "Usuario")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
+    @JsonProperty("id_usuario")
     private Integer idUsuario;
 
-    @NotBlank
-    @Size(max = 100, message = "El nombre no debe superar 100 caracteres")
+    @NotBlank(message = "El nombre no debe estar vacío")
+    @Size(max = 150, message = "El nombre no debe superar 150 caracteres")
+    @JsonProperty("nombre")
     private String nombre;
 
-    @Email
-    @NotBlank
-    @Size(max = 100, message = "El email no debe superar 100 caracteres")
+    @NotBlank(message = "El email no debe estar vacío")
+    @Email(message = "El email debe ser válido")
+    @Size(max = 150, message = "El email no debe superar 150 caracteres")
     @Column(unique = true)
+    @JsonProperty("email")
     private String email;
 
-    @NotBlank
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String password; 
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    @JsonProperty("password")
+    private String password;
 
-    @NotBlank
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @NotBlank(message = "El rol no debe estar vacío")
     @Pattern(regexp = "ADMINISTRADOR|USUARIO", message = "El rol debe ser ADMINISTRADOR o USUARIO")
+    @JsonProperty("rol")
     private String rol; 
 
-    @NotBlank
     @Pattern(regexp = "activo|inactivo", message = "El estado debe ser 'activo' o 'inactivo'")
+    @JsonProperty("estado")
     private String estado = "activo";
 
-    
-    @NotBlank
-    @Size(min = 8, max = 8, message = "El RUT debe tener 8 dígitos (sin puntos ni guion)")
-    @Pattern(regexp = "^\\d{8}$", message = "El RUT debe contener exactamente 8 dígitos (sin puntos ni guion)")
+    @Size(min = 7, max = 8, message = "El RUT debe tener entre 7 y 8 dígitos")
+    @Pattern(regexp = "^\\d{7,8}$", message = "El RUT debe contener entre 7 y 8 dígitos")
     @Column(name = "rut")
+    @JsonProperty("rut")
     private String rut;
 
-    
-    @NotBlank
     @Size(min = 1, max = 1, message = "El dígito verificador debe tener 1 carácter")
-    @Pattern(regexp = "^[1-9Kk]$", message = "El dígito verificador debe ser del 1 al 9 o 'K'")
+    @Pattern(regexp = "^[0-9Kk]$", message = "El dígito verificador debe ser del 0 al 9 o 'K'")
     @Column(name = "dv")
+    @JsonProperty("dv")
     private String dv;
 
-    
-    @NotBlank
-    @Size(max = 100, message = "La región no debe superar 100 caracteres")
+    @Size(max = 150, message = "La región no debe superar 150 caracteres")
     @Column(name = "region")
+    @JsonProperty("region")
     private String region;
 
-    @NotBlank
-    @Size(max = 100, message = "La comuna no debe superar 100 caracteres")
+    @Size(max = 150, message = "La comuna no debe superar 150 caracteres")
     @Column(name = "comuna")
+    @JsonProperty("comuna")
     private String comuna;
 }

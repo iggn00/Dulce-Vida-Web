@@ -41,6 +41,18 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const data = await loginService(email, password)
+      // Considerar login exitoso si viene id_usuario, email y rol
+      if (data?.id_usuario && data?.email && data?.rol) {
+        // Guardar token si viene
+        if (data.token) {
+          storeTokens(data.token, data.refreshToken)
+        }
+        const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }
+        setUser(u)
+        try { localStorage.setItem('dv.auth.user', JSON.stringify(u)) } catch {}
+        return { ok: true, user: u }
+      }
+      // Compatibilidad: si viene exito y token
       if (data?.exito) {
         storeTokens(data.token, data.refreshToken)
         const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }

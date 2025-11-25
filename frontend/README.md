@@ -1,16 +1,102 @@
-# React + Vite
+# DulceVida Frontend – SPA React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend del proyecto **DulceVida**, pastelería online desarrollada como proyecto académico DUOC.
+Implementado como **Single Page Application (SPA)** usando **React**, **Vite** y consumo de API REST del backend.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 1. Instrucciones de instalación
 
-## React Compiler
+### Requisitos previos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Node.js** 20.x (recomendado)
+- **npm** (incluido con Node.js)
 
-## Expanding the ESLint configuration
+### Instalación de dependencias
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Desde la carpeta `frontend`:
+
+```powershell
+cd frontend
+npm install
+```
+
+Esto descargará todas las dependencias definidas en `package.json`.
+
+---
+
+## 2. Instrucciones de ejecución
+
+### Entorno de desarrollo
+
+Desde la carpeta `frontend`:
+
+```powershell
+cd frontend
+npm run dev
+```
+
+- La aplicación se levanta por defecto en: `http://localhost:5173`
+- Asegúrate de tener el **backend** corriendo en `http://localhost:8080` (según configuración por defecto) para poder consumir la API.
+
+### Build para producción
+
+```powershell
+cd frontend
+npm run build
+```
+
+El resultado quedará en la carpeta `dist/`.
+
+---
+
+## 3. Testing del frontend
+
+El frontend utiliza **Vitest** y **React Testing Library** para las pruebas.
+
+### Ejecutar todos los tests
+
+```powershell
+cd frontend
+npm test
+```
+
+### Ejecutar un test específico
+
+Por ejemplo, sólo `LoginPage.test.jsx`:
+
+```powershell
+cd frontend
+npm test -- LoginPage.test.jsx
+```
+
+Los tests se encuentran en `src/__tests__/` y cubren, entre otros:
+
+- `AuthContextRefresh.test.jsx` – manejo de sesión.
+- `CartContextLogic.test.jsx` – lógica del carrito de compras.
+- `LoginPage.test.jsx` – flujo de autenticación.
+- `ProtectedRoute.test.jsx` – protección de rutas según rol.
+
+---
+
+## 4. Configuración de la API
+
+La URL base del backend se configura en los servicios del frontend (por ejemplo en `src/services/api.js` o variables de entorno `.env`).
+
+Por defecto, el proyecto está pensado para apuntar a:
+
+```text
+http://localhost:8080
+```
+
+Si el backend se ejecuta en otra URL o puerto, actualiza la configuración correspondiente.
+
+---
+
+## 5. Notas para evaluación académica (DUOC)
+
+- Frontend construido con **React + Vite**, organizado en capas:
+	- `components/`, `pages/`, `context/`, `services/`, `styles/`.
+- Manejo de estado global con **Context API** para autenticación y carrito.
+- Testing automatizado con **Vitest** y **React Testing Library**.
+- Integración completa con el backend documentado en `backend/README.md` (Swagger + Postman).

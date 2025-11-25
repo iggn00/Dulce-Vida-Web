@@ -1,3 +1,4 @@
+
 package com.dulcevida.backend.servicio;
 
 import com.dulcevida.backend.modelo.Usuario;
@@ -141,5 +142,10 @@ public class UsuarioServicio {
             usuarioRepositorio.save(u);
             return Optional.of(u);
         });
+    }
+    // Valida la contraseña en texto plano contra la cifrada
+    public boolean passwordValida(Usuario usuario, String passwordPlano) {
+        if (usuario == null || passwordPlano == null) return false;
+        return passwordEncoder.matches(passwordPlano, usuario.getPassword());
     }
 }

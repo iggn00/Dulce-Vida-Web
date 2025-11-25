@@ -38,28 +38,47 @@ export default function RegisterPage() {
   }
 
   const onSubmit = async (e) => {
-    e.preventDefault()
-    setError(''); setMsg(''); setLoading(true)
+    e.preventDefault();
+    setError(''); setMsg(''); setLoading(true);
     try {
-      // Validar y parsear RUT con guion: 8 dígitos + '-' + DV (DV: 1-9 o K)
-      const rutCompleto = (form.rutCompleto || '').toUpperCase().trim()
-      if (!/^\d{8}-[1-9K]$/.test(rutCompleto)) {
-        throw new Error("RUT inválido. Debe tener 8 dígitos + DV (1-9 o K). Ej: 12345678-K")
+      // Validar campos obligatorios
+      if (!form.nombre.trim()) throw new Error('El nombre es obligatorio');
+      if (!form.email.trim()) throw new Error('El email es obligatorio');
+      if (!form.password || form.password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres');
+      const rutCompleto = (form.rutCompleto || '').toUpperCase().trim();
+      // Validar formato: 7 u 8 dígitos + guion + DV (0-9 o K)
+      if (!/^\d{7,8}-[0-9K]$/.test(rutCompleto)) {
+        throw new Error('RUT inválido. Debe tener 7 u 8 dígitos, guion y DV (0-9 o K). Ej: 12345678-K o 1234567-9');
       }
-      const [rut, dv] = rutCompleto.split('-')
-      if (!form.region) throw new Error('Seleccione una región')
-      if (!form.comuna) throw new Error('Seleccione una comuna')
+      if (!form.region) throw new Error('Seleccione una región');
+      if (!form.comuna) throw new Error('Seleccione una comuna');
 
-      await registerService(form.nombre, form.email, form.password, form.rol, rut, dv, form.region, form.comuna)
-      setMsg('Usuario creado correctamente. Ya puedes iniciar sesión.')
-      setForm({ nombre: '', email: '', password: '', rol: 'USUARIO', rutCompleto: '', region: '', comuna: '' })
+      // Separar rut y dv
+      const [rut, dv] = rutCompleto.split('-');
+      await registerService({
+        nombre: form.nombre,
+        email: form.email,
+        password: form.password,
+        rol: form.rol,
+        rut,
+        dv,
+        region: form.region,
+        comuna: form.comuna
+      });
+      setMsg('Usuario creado correctamente. Ya puedes iniciar sesión.');
+      setForm({ nombre: '', email: '', password: '', rol: 'USUARIO', rutCompleto: '', region: '', comuna: '' });
     } catch (e) {
-      const resp = e?.response?.data
-      setError(resp?.errores ? resp.errores.join(', ') : (resp?.mensaje || e.message || 'Error creando usuario'))
+      const resp = e?.response?.data;
+      if (resp?.errores && typeof resp.errores === 'object') {
+        const errores = Object.values(resp.errores).join(', ');
+        setError(errores);
+      } else {
+        setError(resp?.mensaje || e.message || 'Error creando usuario');
+      }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  } 
 
   return (
     <div className="row justify-content-center">

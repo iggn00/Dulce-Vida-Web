@@ -1,0 +1,10 @@
+{
+  "nombre": "prueba",
+  "email": "prueba@email.com",
+  "password": "12345678",
+  "rol": "USUARIO",
+  "rut": "12345678",
+  "dv": "9",
+  "region": "Región de Prueba",
+  "comuna": "Comuna Prueba"
+}

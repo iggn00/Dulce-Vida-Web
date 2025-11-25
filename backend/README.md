@@ -25,7 +25,7 @@ CREATE DATABASE dulcevidadb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 2. Verificar/ajustar credenciales en `src/main/resources/application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/dulcevidadb?serverTimezone=UTC&useSSL=false
+spring.datasource.url=jdbc:mysql://localhost:3306/dulcevidadb?serverTimezone=UTC&useSSL=false&createDatabaseIfNotExist=true
 spring.datasource.username=root
 spring.datasource.password=
 ```
@@ -33,7 +33,7 @@ spring.datasource.password=
 (Modifica `username` y `password` según tu entorno local.)
 
 3. El proyecto está configurado con `spring.jpa.hibernate.ddl-auto=update`, por lo que las tablas se crearán/ajustarán automáticamente al iniciar la aplicación.
-   Además, existen scripts en `src/main/resources/db` (`init.sql`, `seed.sql`) para datos iniciales.
+   Además, el arranque ejecuta `src/main/resources/db/seed.sql` para crear datos de ejemplo si la base está vacía (categorías, productos demo, usuario de prueba, etc.).
 
 ### Instalación de dependencias
 

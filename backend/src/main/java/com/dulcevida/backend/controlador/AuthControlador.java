@@ -9,6 +9,7 @@ import com.dulcevida.backend.servicio.UsuarioServicio;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
@@ -61,8 +62,8 @@ public class AuthControlador {
         }
         // Generar token JWT
         String token = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
-        // Para compatibilidad, puedes devolver refreshToken vacío o implementar refresh real
-        String refreshToken = "";
+        // Usar el mismo token como refresh simple para compatibilidad del frontend
+        String refreshToken = token;
         return ResponseEntity.ok(Map.of(
                 "id_usuario", usuario.getIdUsuario(),
                 "nombre", usuario.getNombre(),
@@ -71,6 +72,41 @@ public class AuthControlador {
                 "token", token,
                 "refreshToken", refreshToken,
                 "exito", true
+        ));
+    }
+
+    @GetMapping("/session")
+    public ResponseEntity<?> session(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return usuarioServicio.buscarPorEmail(authentication.getName())
+                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(Map.of(
+                        "id_usuario", u.getIdUsuario(),
+                        "nombre", u.getNombre(),
+                        "email", u.getEmail(),
+                        "rol", u.getRol()
+                )))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody Map<String, String> body) {
+        String refresh = body != null ? body.get("refreshToken") : null;
+        if (refresh == null || !jwtUtil.isTokenValid(refresh)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("mensaje", "Refresh token inválido"));
+        }
+        String email = jwtUtil.extractUsername(refresh);
+        String role = jwtUtil.extractRole(refresh);
+        if (email == null || role == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("mensaje", "Refresh token inválido"));
+        }
+        String newToken = jwtUtil.generateToken(email, role);
+        return ResponseEntity.ok(Map.of(
+                "token", newToken,
+                "refreshToken", refresh
         ));
     }
 

@@ -19,10 +19,13 @@ public class AuthControlador {
 
     private final UsuarioServicio usuarioServicio;
     private final JwtUtil jwtUtil;
+    private final com.dulcevida.backend.servicio.RefreshTokenServicio refreshTokenServicio;
 
-    public AuthControlador(UsuarioServicio usuarioServicio, JwtUtil jwtUtil) {
+
+    public AuthControlador(UsuarioServicio usuarioServicio, JwtUtil jwtUtil, com.dulcevida.backend.servicio.RefreshTokenServicio refreshTokenServicio) {
         this.usuarioServicio = usuarioServicio;
         this.jwtUtil = jwtUtil;
+        this.refreshTokenServicio = refreshTokenServicio;
     }
 
     @PostMapping("/register")
@@ -62,17 +65,19 @@ public class AuthControlador {
         }
         // Generar token JWT
         String token = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
-        // Usar el mismo token como refresh simple para compatibilidad del frontend
-        String refreshToken = token;
-        return ResponseEntity.ok(Map.of(
+        // Generar refresh token único y persistente (7 días)
+        var refreshTokenObj = refreshTokenServicio.crearRefreshToken(usuario, 7 * 24 * 3600);
+        String refreshToken = refreshTokenObj.getToken();
+        return ResponseEntity.ok()
+            .header("Set-Cookie", "dv_token=" + token + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Lax")
+            .header("Set-Cookie", "dv_refresh=" + refreshToken + "; HttpOnly; Path=/; Max-Age=" + (7*24*3600) + "; SameSite=Lax")
+            .body(Map.of(
                 "id_usuario", usuario.getIdUsuario(),
                 "nombre", usuario.getNombre(),
                 "email", usuario.getEmail(),
                 "rol", usuario.getRol(),
-                "token", token,
-                "refreshToken", refreshToken,
                 "exito", true
-        ));
+            ));
     }
 
     @GetMapping("/session")
@@ -91,23 +96,55 @@ public class AuthControlador {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody Map<String, String> body) {
-        String refresh = body != null ? body.get("refreshToken") : null;
-        if (refresh == null || !jwtUtil.isTokenValid(refresh)) {
+    public ResponseEntity<?> refresh(jakarta.servlet.http.HttpServletRequest request) {
+        String refresh = null;
+        var cookies = request.getCookies();
+        if (cookies != null) {
+            for (var c : cookies) {
+                if ("dv_refresh".equals(c.getName())) {
+                    refresh = c.getValue();
+                    break;
+                }
+            }
+        }
+        if (refresh == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("mensaje", "Refresh token ausente"));
+        }
+        var refreshOpt = refreshTokenServicio.buscarPorToken(refresh);
+        if (refreshOpt.isEmpty() || refreshOpt.get().isRevocado() || refreshOpt.get().getExpiraEn().isBefore(java.time.Instant.now())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("mensaje", "Refresh token inválido"));
         }
-        String email = jwtUtil.extractUsername(refresh);
-        String role = jwtUtil.extractRole(refresh);
-        if (email == null || role == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("mensaje", "Refresh token inválido"));
-        }
-        String newToken = jwtUtil.generateToken(email, role);
-        return ResponseEntity.ok(Map.of(
-                "token", newToken,
-                "refreshToken", refresh
-        ));
+        var usuario = refreshOpt.get().getUsuario();
+        String newToken = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
+        return ResponseEntity.ok()
+            .header("Set-Cookie", "dv_token=" + newToken + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Lax")
+            .header("Set-Cookie", "dv_refresh=" + refresh + "; HttpOnly; Path=/; Max-Age=" + (7*24*3600) + "; SameSite=Lax")
+            .body(Map.of("exito", true));
     }
 
-}
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(jakarta.servlet.http.HttpServletRequest request) {
+        // Eliminar refresh token de BD y cookie
+        String refreshLogout = null;
+        var cookiesLogout = request.getCookies();
+        if (cookiesLogout != null) {
+            for (var c : cookiesLogout) {
+                if ("dv_refresh".equals(c.getName())) {
+                    refreshLogout = c.getValue();
+                    break;
+                }
+            }
+        }
+        if (refreshLogout != null) {
+            var refreshOptLogout = refreshTokenServicio.buscarPorToken(refreshLogout);
+            refreshOptLogout.ifPresent(refreshTokenServicio::revocarToken);
+        }
+        return ResponseEntity.ok()
+                .header("Set-Cookie", "dv_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax")
+                .header("Set-Cookie", "dv_refresh=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax")
+                .body(Map.of("exito", true));
+    }
+    }
+

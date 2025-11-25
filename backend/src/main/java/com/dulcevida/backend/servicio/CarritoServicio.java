@@ -1,8 +1,8 @@
+
 package com.dulcevida.backend.servicio;
 
 import com.dulcevida.backend.modelo.*;
 import com.dulcevida.backend.repositorio.*;
-import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,29 +29,16 @@ public class CarritoServicio {
     @Autowired
     private DetalleBoletaRepositorio detalleBoletaRepositorio;
 
-    private Optional<Usuario> usuarioActual(HttpSession session) {
-        // Primero intentar obtener desde el contexto de seguridad JWT
+    private Optional<Usuario> usuarioActual() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getName() != null) {
             return usuarioServicio.buscarPorEmail(auth.getName());
         }
-        // Fallback a sesión (establecida en login para compatibilidad)
-        Object id = session.getAttribute("usuarioId");
-        if (id != null) {
-            return usuarioServicio.buscarPorId((Integer) id);
-        }
         return Optional.empty();
     }
 
-    private String guestEmail(HttpSession session) {
-        
-        String sid = session.getId();
-        return "guest-" + sid + "@guest.local";
-    }
-
-    private Cliente clienteDeSesion(HttpSession session) {
-        
-        Optional<Usuario> uopt = usuarioActual(session);
+    private Cliente clienteDeSesion() {
+        Optional<Usuario> uopt = usuarioActual();
         if (uopt.isPresent()) {
             Usuario u = uopt.get();
             return clienteRepositorio.findByEmail(u.getEmail()).orElseGet(() -> {
@@ -62,15 +49,7 @@ public class CarritoServicio {
                 return clienteRepositorio.save(c);
             });
         }
-        
-        String gEmail = guestEmail(session);
-        return clienteRepositorio.findByEmail(gEmail).orElseGet(() -> {
-            Cliente c = new Cliente();
-            c.setNombre("Invitado");
-            c.setEmail(gEmail);
-            c.setTelefono(null);
-            return clienteRepositorio.save(c);
-        });
+        throw new IllegalStateException("No hay usuario autenticado");
     }
 
     private Pedido carritoDe(Cliente c) {
@@ -85,8 +64,8 @@ public class CarritoServicio {
                 });
     }
 
-    public Map<String, Object> obtenerCarrito(HttpSession session) {
-        Cliente cli = clienteDeSesion(session);
+    public Map<String, Object> obtenerCarrito() {
+        Cliente cli = clienteDeSesion();
         Pedido pedido = carritoDe(cli);
         List<DetallePedido> detalles = detallePedidoRepositorio.findByPedido(pedido);
         BigDecimal total = detalles.stream()
@@ -103,7 +82,6 @@ public class CarritoServicio {
             it.put("idDetalle", d.getIdDetalle());
             it.put("cantidad", d.getCantidad());
             it.put("precioUnitario", d.getPrecioUnitario());
-            
             Map<String, Object> pMap = new HashMap<>();
             if (p != null) {
                 pMap.put("idProducto", p.getIdProducto());
@@ -124,10 +102,10 @@ public class CarritoServicio {
                 "count", cantidadTotal);
     }
 
-    public Map<String, Object> agregar(HttpSession session, Integer idProducto, Integer cantidad) {
+    public Map<String, Object> agregar(Integer idProducto, Integer cantidad) {
         if (cantidad == null || cantidad <= 0)
             cantidad = 1;
-        Cliente cli = clienteDeSesion(session);
+        Cliente cli = clienteDeSesion();
         Pedido pedido = carritoDe(cli);
         Producto prod = productoRepositorio.findById(Objects.requireNonNull(idProducto)).orElseThrow();
         Integer stock = Optional.ofNullable(prod.getStock()).orElse(0);
@@ -145,37 +123,34 @@ public class CarritoServicio {
                 });
         int actual = Optional.ofNullable(det.getCantidad()).orElse(0);
         int nuevo = actual + cantidad;
-        
         if (stock >= 0)
             nuevo = Math.min(nuevo, stock);
         det.setCantidad(nuevo);
         detallePedidoRepositorio.save(det);
-        return obtenerCarrito(session);
+        return obtenerCarrito();
     }
 
-    public Map<String, Object> quitar(HttpSession session, Integer idDetalle) {
+    public Map<String, Object> quitar(Integer idDetalle) {
         detallePedidoRepositorio.deleteById(Objects.requireNonNull(idDetalle));
-        return obtenerCarrito(session);
+        return obtenerCarrito();
     }
 
-    public Map<String, Object> limpiar(HttpSession session) {
-        Cliente cli = clienteDeSesion(session);
+    public Map<String, Object> limpiar() {
+        Cliente cli = clienteDeSesion();
         Pedido pedido = carritoDe(cli);
         List<DetallePedido> detalles = detallePedidoRepositorio.findByPedido(pedido);
         detallePedidoRepositorio.deleteAll(Objects.requireNonNull(detalles));
-        return obtenerCarrito(session);
+        return obtenerCarrito();
     }
 
     @Transactional
-    public Map<String, Object> actualizarCantidad(HttpSession session, Integer idDetalle, Integer cantidad) {
+    public Map<String, Object> actualizarCantidad(Integer idDetalle, Integer cantidad) {
         Objects.requireNonNull(idDetalle);
         if (cantidad == null || cantidad <= 0) {
-            
             detallePedidoRepositorio.deleteById(idDetalle);
-            return obtenerCarrito(session);
+            return obtenerCarrito();
         }
         DetallePedido det = detallePedidoRepositorio.findById(idDetalle).orElseThrow();
-        
         Producto p = det.getProducto();
         Integer stock = p != null ? p.getStock() : null;
         int finalQty = cantidad;
@@ -185,27 +160,24 @@ public class CarritoServicio {
         det.setCantidad(finalQty);
         detallePedidoRepositorio.save(det);
         detallePedidoRepositorio.flush();
-        return obtenerCarrito(session);
+        return obtenerCarrito();
     }
 
     @Transactional
-    public Map<String, Object> finalizar(HttpSession session) {
-        Cliente cli = clienteDeSesion(session);
+    public Map<String, Object> finalizar() {
+        Cliente cli = clienteDeSesion();
         Pedido pedido = carritoDe(cli);
         List<DetallePedido> detalles = detallePedidoRepositorio.findByPedido(pedido);
         if (detalles.isEmpty()) {
             throw new IllegalArgumentException("El carrito está vacío");
         }
-        
         BigDecimal total = detalles.stream()
                 .map(d -> d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         pedido.setTotal(total);
-        
         String paymentId = UUID.randomUUID().toString();
         String paymentMethod = "simulado";
         String status = "aprobado";
-        
         for (DetallePedido d : detalles) {
             Producto prod = d.getProducto();
             if (prod != null) {
@@ -220,10 +192,8 @@ public class CarritoServicio {
                 productoRepositorio.save(prod);
             }
         }
-        
         pedido.setEstado("confirmado");
         pedidoRepositorio.save(pedido);
-
         // Generar boleta correlativa
         BigDecimal subtotal = total;
         BigDecimal iva = subtotal.multiply(new BigDecimal("0.19"));
@@ -240,7 +210,6 @@ public class CarritoServicio {
         boleta.setIva(iva);
         boleta.setTotal(totalConIva);
         boletaRepositorio.save(boleta);
-
         for (DetallePedido d : detalles) {
             DetalleBoleta db = new DetalleBoleta();
             db.setBoleta(boleta);
@@ -251,15 +220,11 @@ public class CarritoServicio {
             db.setTotalLinea(linea);
             detalleBoletaRepositorio.save(db);
         }
-
-        
-        
         Map<String, Object> pago = new HashMap<>();
         pago.put("paymentId", paymentId);
         pago.put("status", status);
         pago.put("method", paymentMethod);
         pago.put("paidAt", new Date());
-
         return Map.of(
             "pedidoId", pedido.getIdPedido(),
             "estado", pedido.getEstado(),

@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpSession;
+// Eliminado HttpSession
 
 @RestController
 @RequestMapping("/api/boletas")
@@ -25,22 +25,19 @@ public class BoletaControlador {
     @Autowired
     private UsuarioServicio usuarioServicio;
 
-    private Usuario usuarioSesion(HttpSession session){
+    private Usuario usuarioSesion(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getName() != null &&
                 !"anonymousUser".equalsIgnoreCase(auth.getName())) {
             return usuarioServicio.buscarPorEmail(auth.getName()).orElse(null);
         }
-        Object id = session.getAttribute("usuarioId");
-        if (id == null) return null;
-        return usuarioServicio.buscarPorId((Integer)id).orElse(null);
+        return null;
     }
 
     @GetMapping("/mias")
     public ResponseEntity<?> misBoletas(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10") int size,
-                                        HttpSession session){
-        Usuario u = usuarioSesion(session);
+                                        @RequestParam(defaultValue = "10") int size){
+        Usuario u = usuarioSesion();
         if (u == null) return ResponseEntity.status(401).build();
         Page<Boleta> boletas = boletaRepositorio.findByPedido_Cliente_EmailOrderByFechaEmisionDesc(u.getEmail(), PageRequest.of(page, size));
         return ResponseEntity.ok(boletas);
@@ -48,9 +45,8 @@ public class BoletaControlador {
 
     @GetMapping("/admin")
     public ResponseEntity<?> todas(@RequestParam(defaultValue = "0") int page,
-                                   @RequestParam(defaultValue = "10") int size,
-                                   HttpSession session){
-        Usuario u = usuarioSesion(session);
+                                   @RequestParam(defaultValue = "10") int size){
+        Usuario u = usuarioSesion();
         if (u == null || u.getRol()==null || !u.getRol().equalsIgnoreCase("ADMINISTRADOR")){
             return ResponseEntity.status(403).build();
         }
@@ -59,8 +55,8 @@ public class BoletaControlador {
     }
 
     @GetMapping("/{id}/detalles")
-    public ResponseEntity<?> detalles(@PathVariable Integer id, HttpSession session){
-        Usuario u = usuarioSesion(session);
+    public ResponseEntity<?> detalles(@PathVariable Integer id){
+        Usuario u = usuarioSesion();
         if (u == null) return ResponseEntity.status(401).build();
         return boletaRepositorio.findById(id)
                 .map(b->{

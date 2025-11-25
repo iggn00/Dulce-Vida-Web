@@ -4,7 +4,7 @@ import com.dulcevida.backend.modelo.Categoria;
 import com.dulcevida.backend.servicio.CategoriaServicio;
 import com.dulcevida.backend.servicio.UsuarioServicio;
 import com.dulcevida.backend.modelo.Usuario;
-import jakarta.servlet.http.HttpSession;
+// Eliminado HttpSession
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +23,15 @@ public class CategoriaControlador {
     @Autowired
     private UsuarioServicio usuarioServicio;
 
-    private boolean esAdmin(HttpSession session){
-        Object id = session.getAttribute("usuarioId");
-        if (id == null) return false;
-        return usuarioServicio.buscarPorId((Integer) id)
+    private boolean esAdmin(){
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getName() != null && !"anonymousUser".equalsIgnoreCase(auth.getName())) {
+            return usuarioServicio.buscarPorEmail(auth.getName())
                 .map(Usuario::getRol)
                 .map(r -> r.equalsIgnoreCase("ADMINISTRADOR"))
                 .orElse(false);
+        }
+        return false;
     }
 
     @GetMapping
@@ -44,21 +46,21 @@ public class CategoriaControlador {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Categoria categoria, HttpSession session) {
-        if (!esAdmin(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> crear(@Valid @RequestBody Categoria categoria) {
+        if (!esAdmin()) return ResponseEntity.status(403).body("No autorizado");
         return ResponseEntity.ok(categoriaServicio.crear(categoria));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Categoria cambios, HttpSession session) {
-        if (!esAdmin(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Categoria cambios) {
+        if (!esAdmin()) return ResponseEntity.status(403).body("No autorizado");
         Optional<Categoria> opt = categoriaServicio.actualizar(id, cambios);
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id, HttpSession session) {
-        if (!esAdmin(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        if (!esAdmin()) return ResponseEntity.status(403).body("No autorizado");
         categoriaServicio.eliminar(id);
         return ResponseEntity.noContent().build();
     }

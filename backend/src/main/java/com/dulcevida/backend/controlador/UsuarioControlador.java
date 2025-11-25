@@ -3,7 +3,7 @@ package com.dulcevida.backend.controlador;
 import com.dulcevida.backend.dto.UsuarioMapper;
 import com.dulcevida.backend.modelo.Usuario;
 import com.dulcevida.backend.servicio.UsuarioServicio;
-import jakarta.servlet.http.HttpSession;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,47 +25,44 @@ public class UsuarioControlador {
     @org.springframework.beans.factory.annotation.Value("${app.registration.allowAdmin:false}")
     private boolean registroPermiteAdmin;
 
-    private Optional<Usuario> usuarioActual(HttpSession session){
+    private Optional<Usuario> usuarioActual(){
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getName() != null &&
                 !"anonymousUser".equalsIgnoreCase(auth.getName())) {
-            Optional<Usuario> u = usuarioServicio.buscarPorEmail(auth.getName());
-            if (u.isPresent()) return u;
+            return usuarioServicio.buscarPorEmail(auth.getName());
         }
-        Object id = session.getAttribute("usuarioId");
-        if (id == null) return Optional.empty();
-        return usuarioServicio.buscarPorId((Integer) id);
+        return Optional.empty();
     }
 
-    private boolean esAdminPermitido(HttpSession session){
-        return usuarioActual(session)
+    private boolean esAdminPermitido(){
+        return usuarioActual()
                 .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR"))
                 .orElse(false);
     }
 
     @GetMapping
-    public ResponseEntity<?> listar(HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> listar() {
+        if (!esAdminPermitido()) return ResponseEntity.status(403).body("No autorizado");
         return ResponseEntity.ok(usuarioServicio.listar().stream().map(UsuarioMapper::toDTO).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detalle(@PathVariable Integer id, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> detalle(@PathVariable Integer id) {
+        if (!esAdminPermitido()) return ResponseEntity.status(403).body("No autorizado");
         Optional<Usuario> opt = usuarioServicio.buscarPorId(id);
         return opt.<ResponseEntity<?>>map(u -> ResponseEntity.ok(UsuarioMapper.toDTO(u))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<?> buscar(@RequestParam("q") @NotBlank String texto, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> buscar(@RequestParam("q") @NotBlank String texto) {
+        if (!esAdminPermitido()) return ResponseEntity.status(403).body("No autorizado");
         return ResponseEntity.ok(usuarioServicio.buscarPorTexto(texto).stream().map(UsuarioMapper::toDTO).toList());
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Usuario usuario, HttpSession session) {
-        Integer idActual = usuarioActual(session).map(Usuario::getIdUsuario).orElse(null);
-        boolean esAdmin = esAdminPermitido(session);
+    public ResponseEntity<?> crear(@Valid @RequestBody Usuario usuario) {
+        Integer idActual = usuarioActual().map(Usuario::getIdUsuario).orElse(null);
+        boolean esAdmin = esAdminPermitido();
 
         if (idActual == null || !esAdmin) {
             if (usuario.getRol() != null && usuario.getRol().equalsIgnoreCase("ADMINISTRADOR") && !registroPermiteAdmin) {
@@ -78,22 +75,22 @@ public class UsuarioControlador {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody Usuario cambios, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody Usuario cambios) {
+        if (!esAdminPermitido()) return ResponseEntity.status(403).body("No autorizado");
         Optional<Usuario> opt = usuarioServicio.actualizar(id, cambios);
         return opt.<ResponseEntity<?>>map(u -> ResponseEntity.ok(UsuarioMapper.toDTO(u))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        if (!esAdminPermitido()) return ResponseEntity.status(403).body("No autorizado");
         usuarioServicio.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<?> actualizarEstado(@PathVariable Integer id, @RequestBody java.util.Map<String,String> body, HttpSession session){
-        if (!esAdminPermitido(session)) return ResponseEntity.status(403).body("No autorizado");
+    public ResponseEntity<?> actualizarEstado(@PathVariable Integer id, @RequestBody java.util.Map<String,String> body){
+        if (!esAdminPermitido()) return ResponseEntity.status(403).body("No autorizado");
         String estado = body != null ? body.get("estado") : null;
         return usuarioServicio.actualizarEstado(id, estado)
             .<ResponseEntity<?>>map(u -> ResponseEntity.ok(UsuarioMapper.toDTO(u)))
@@ -101,8 +98,8 @@ public class UsuarioControlador {
     }
 
     @PostMapping("/{id}/password")
-    public ResponseEntity<?> cambiarPassword(@PathVariable Integer id, @RequestBody java.util.Map<String,String> body, HttpSession session){
-        Integer usuarioIdActual = usuarioActual(session).map(Usuario::getIdUsuario).orElse(null);
+    public ResponseEntity<?> cambiarPassword(@PathVariable Integer id, @RequestBody java.util.Map<String,String> body){
+        Integer usuarioIdActual = usuarioActual().map(Usuario::getIdUsuario).orElse(null);
         if (usuarioIdActual == null || !usuarioIdActual.equals(id)) return ResponseEntity.status(403).body("No autorizado");
         String actual = body != null ? body.get("actual") : null;
         String nueva = body != null ? body.get("nueva") : null;

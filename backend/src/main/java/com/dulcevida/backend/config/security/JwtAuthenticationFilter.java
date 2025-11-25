@@ -43,12 +43,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String authHeader = request.getHeader("Authorization");
         String token = null;
+        // Buscar el token en la cookie dv_token
+        if (request.getCookies() != null) {
+            for (var c : request.getCookies()) {
+                if ("dv_token".equals(c.getName())) {
+                    token = c.getValue();
+                    break;
+                }
+            }
+        }
         String username = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            username = jwtUtil.isTokenValid(token) ? jwtUtil.extractUsername(token) : null;
+        if (token != null && jwtUtil.isTokenValid(token)) {
+            username = jwtUtil.extractUsername(token);
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails details = userDetailsService.loadUserByUsername(username);

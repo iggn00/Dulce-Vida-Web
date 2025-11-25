@@ -41,12 +41,17 @@ export default function Navbar() {
               </li>
             )}
           </ul>
-          <div className="d-flex align-items-center gap-2 mt-3 mt-md-0">
+          <div className="d-flex align-items-center gap-2 mt-3 mt-md-0 flex-wrap">
             {user ? (
               <>
                 <div className="text-light small d-none d-sm-block me-1" title={user.email}>
                   Hola, <strong>{firstName || 'usuario'}</strong>
                 </div>
+                {user.rol === 'ADMINISTRADOR' ? (
+                  <Link to="/admin/boletas" className="btn btn-dorado rounded-pill shadow-sm px-3">Boletas</Link>
+                ) : (
+                  <Link to="/historial-boletas" className="btn btn-dorado rounded-pill shadow-sm px-3">Historial de compras</Link>
+                )}
                 <button
                   type="button"
                   className="btn btn-outline-light rounded-pill shadow-sm px-3"

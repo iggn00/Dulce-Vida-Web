@@ -25,6 +25,11 @@ export default function Footer() {
                 {user ? (
                   <>
                     <li><Link className="enlace-pie" to={user.rol === 'ADMINISTRADOR' ? '/admin/dashboard' : '/'}>Mi cuenta</Link></li>
+                    {user.rol === 'ADMINISTRADOR' ? (
+                      <li><Link className="enlace-pie" to="/admin/boletas">Boletas</Link></li>
+                    ) : (
+                      <li><Link className="enlace-pie" to="/historial-boletas">Historial de compras</Link></li>
+                    )}
                     <li><button className="enlace-pie btn btn-link p-0 align-baseline" onClick={logout}>Cerrar sesión</button></li>
                   </>
                 ) : (

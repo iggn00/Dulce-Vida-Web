@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.servlet.http.HttpSession;
+// Eliminado HttpSession
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,12 +46,14 @@ public class ProductoControlador {
     @Value("${app.uploads.url-prefix:/uploads/imagenes_productos}")
     private String urlPrefix;
 
-    private boolean esAdminPermitido(HttpSession session){
-        Object id = session.getAttribute("usuarioId");
-        if (id == null) return false;
-    return usuarioServicio.buscarPorId((Integer) id)
-        .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR"))
-        .orElse(false);
+    private boolean esAdminPermitido(){
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getName() != null && !"anonymousUser".equalsIgnoreCase(auth.getName())) {
+            return usuarioServicio.buscarPorEmail(auth.getName())
+                .map(u -> u.getRol() != null && u.getRol().equalsIgnoreCase("ADMINISTRADOR"))
+                .orElse(false);
+        }
+        return false;
     }
 
     @GetMapping
@@ -90,8 +92,8 @@ public class ProductoControlador {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Producto producto, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+    public ResponseEntity<?> crear(@Valid @RequestBody Producto producto) {
+        if (!esAdminPermitido()) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(productoServicio.crear(producto));
         } catch (IllegalArgumentException e) {
@@ -100,8 +102,8 @@ public class ProductoControlador {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Producto cambios, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody Producto cambios) {
+        if (!esAdminPermitido()) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         try {
             Optional<Producto> opt = productoServicio.actualizar(id, cambios);
             return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -111,15 +113,15 @@ public class ProductoControlador {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> inhabilitar(@PathVariable Integer id, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+    public ResponseEntity<?> inhabilitar(@PathVariable Integer id) {
+        if (!esAdminPermitido()) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.inhabilitar(id);
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}/hard")
-    public ResponseEntity<?> eliminar(@PathVariable Integer id, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        if (!esAdminPermitido()) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.buscarPorId(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
@@ -156,8 +158,8 @@ public class ProductoControlador {
     }
 
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<?> actualizarEstado(@PathVariable Integer id, @RequestBody Map<String, String> body, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+    public ResponseEntity<?> actualizarEstado(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+        if (!esAdminPermitido()) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         String estado = body != null ? body.get("estado") : null;
         if (estado == null || !(estado.equalsIgnoreCase("disponible") || estado.equalsIgnoreCase("agotado"))) {
             return ResponseEntity.badRequest().body("Estado inválido. Use 'disponible' o 'agotado'");
@@ -167,15 +169,15 @@ public class ProductoControlador {
     }
 
     @PostMapping("/{id}/restaurar")
-    public ResponseEntity<?> restaurar(@PathVariable Integer id, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+    public ResponseEntity<?> restaurar(@PathVariable Integer id) {
+        if (!esAdminPermitido()) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.actualizarEstado(id, "disponible");
         return opt.<ResponseEntity<?>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/imagen")
-    public ResponseEntity<?> subirImagen(@PathVariable Integer id, @RequestParam MultipartFile archivo, HttpSession session) {
-        if (!esAdminPermitido(session)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+    public ResponseEntity<?> subirImagen(@PathVariable Integer id, @RequestParam MultipartFile archivo) {
+        if (!esAdminPermitido()) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         Optional<Producto> opt = productoServicio.buscarPorId(id);
         if (opt.isEmpty()) {
             return ResponseEntity.notFound().build();

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
-import jakarta.servlet.http.HttpSession;
+// Eliminado HttpSession
 
 @RestController
 @RequestMapping("/api")
@@ -20,17 +20,17 @@ public class AutenticacionControlador {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
         String email = credenciales.get("email");
         String password = credenciales.get("password");
         Optional<Usuario> opt = usuarioServicio.buscarPorEmail(email);
-    if (opt.isPresent() && password != null && password.equals(opt.get().getPassword())) {
+        if (opt.isPresent() && password != null && password.equals(opt.get().getPassword())) {
             Usuario u = opt.get();
-            
-            session.setAttribute("usuarioId", u.getIdUsuario());
-            session.setAttribute("usuarioEmail", u.getEmail());
+            // Aquí deberías generar y devolver el JWT
+            String token = "GENERAR_JWT_AQUI"; // Reemplazar por lógica real
             return ResponseEntity.ok(Map.of(
                     "exito", true,
+                    "token", token,
                     "id_usuario", u.getIdUsuario(),
                     "nombre", u.getNombre(),
                     "email", u.getEmail(),
@@ -40,24 +40,7 @@ public class AutenticacionControlador {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("exito", false, "mensaje", "Credenciales inválidas"));
     }
 
-    @GetMapping("/session")
-    public ResponseEntity<?> session(HttpSession session) {
-        Object id = session.getAttribute("usuarioId");
-        if (id == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        Optional<Usuario> opt = usuarioServicio.buscarPorId((Integer) id);
-        if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        Usuario u = opt.get();
-        return ResponseEntity.ok(Map.of(
-                "id_usuario", u.getIdUsuario(),
-                "nombre", u.getNombre(),
-                "email", u.getEmail(),
-                "rol", u.getRol()
-        ));
-    }
+    // Eliminar endpoint de sesión, ya no es necesario con JWT
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok(Map.of("exito", true));
-    }
+    // Eliminar endpoint de logout, ya no es necesario con JWT
 }

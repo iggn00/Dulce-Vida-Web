@@ -48,10 +48,11 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="cards-hero">
-          <HeroNavCard to="/admin/usuarios" variant="violeta" icon="👤" title="Usuarios" value={usuarios} />
-          <HeroNavCard to="/admin/productos" variant="azul" icon="🧁" title="Productos" value={productos} />
-          <HeroNavCard to="/admin/productos" variant="verde" icon="📦" title="Inventario" subtitle="Bajo stock" value={bajoStock} />
-          <HeroNavCard to="/admin/contactos" variant="oro" icon="✉️" title="Contactos" value={contactos} />
+            <HeroNavCard to="/admin/usuarios" variant="violeta" icon="👤" title="Usuarios" value={usuarios} />
+            <HeroNavCard to="/admin/productos" variant="azul" icon="🧁" title="Productos" value={productos} />
+            <HeroNavCard to="/admin/productos" variant="verde" icon="📦" title="Inventario" subtitle="Bajo stock" value={bajoStock} />
+            <HeroNavCard to="/admin/contactos" variant="oro" icon="✉️" title="Contactos" value={contactos} />
+            <HeroNavCard to="/admin/boletas" variant="dorado" icon="🧾" title="Boletas" subtitle="Historial" value={0} />
         </div>
       )}
       <div className="muted small" style={{marginTop:'.75rem'}}>Última actualización: {ts.toLocaleString()}</div>

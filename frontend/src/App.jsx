@@ -48,7 +48,6 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
       <Routes>
-        {}
         <Route path="/" element={<Layout />}> 
           <Route index element={<HomePage />} />
           <Route path="productos" element={<ProductosPage />} />
@@ -57,9 +56,14 @@ export default function App() {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="carrito" element={<CartPage />} />
+          <Route path="historial-boletas" element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+            <Route index element={import('./pages/HistorialBoletasPage.jsx').then(m => <m.default />)} />
+          </Route>
+          <Route path="boleta/:id" element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+            <Route index element={import('./pages/BoletaDetallePage.jsx').then(m => <m.default />)} />
+          </Route>
         </Route>
 
-        {}
         <Route path="/admin" element={<ProtectedRoute requiredRoles={["ADMINISTRADOR"]} />}> 
           <Route element={<AdminLayoutShell title="Panel" />}> 
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -67,6 +71,7 @@ export default function App() {
             <Route path="usuarios" element={<UsuariosPage />} />
             <Route path="productos" element={<AdminProductosPage />} />
             <Route path="contactos" element={<AdminContactosPage />} />
+            <Route path="boletas" element={import('./pages/admin/BoletasPage.jsx').then(m => <m.default />)} />
           </Route>
         </Route>
 

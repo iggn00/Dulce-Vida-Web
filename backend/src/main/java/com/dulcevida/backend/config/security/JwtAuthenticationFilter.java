@@ -29,6 +29,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
         String method = request.getMethod();
+        // Permitir acceso sin JWT solo a login, register y refresh
+        if (path.equals("/auth/login") || path.equals("/auth/register") || path.equals("/auth/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         // Permitir acceso sin JWT a los endpoints GET públicos
         if (method.equalsIgnoreCase("GET") && (
                 path.startsWith("/api/productos") ||

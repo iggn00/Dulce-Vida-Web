@@ -1,4 +1,3 @@
-
 package com.dulcevida.backend.controlador;
 import com.dulcevida.backend.config.security.JwtUtil;
 
@@ -65,12 +64,12 @@ public class AuthControlador {
         }
         // Generar token JWT
         String token = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
-        // Generar refresh token único y persistente (7 días)
-        var refreshTokenObj = refreshTokenServicio.crearRefreshToken(usuario, 7 * 24 * 3600);
+        // Generar refresh token único y persistente (365 días)
+        var refreshTokenObj = refreshTokenServicio.crearRefreshToken(usuario, 365 * 24 * 3600);
         String refreshToken = refreshTokenObj.getToken();
         return ResponseEntity.ok()
             .header("Set-Cookie", "dv_token=" + token + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Lax")
-            .header("Set-Cookie", "dv_refresh=" + refreshToken + "; HttpOnly; Path=/; Max-Age=" + (7*24*3600) + "; SameSite=Lax")
+            .header("Set-Cookie", "dv_refresh=" + refreshToken + "; HttpOnly; Path=/; Max-Age=" + (365*24*3600) + "; SameSite=Lax")
             .body(Map.of(
                 "id_usuario", usuario.getIdUsuario(),
                 "nombre", usuario.getNombre(),
@@ -82,17 +81,28 @@ public class AuthControlador {
 
     @GetMapping("/session")
     public ResponseEntity<?> session(Authentication authentication) {
+        System.out.println("[SESSION] Autenticación: " + authentication);
         if (authentication == null || !authentication.isAuthenticated()) {
+            System.out.println("[SESSION] No autenticado");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return usuarioServicio.buscarPorEmail(authentication.getName())
-                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(Map.of(
-                        "id_usuario", u.getIdUsuario(),
-                        "nombre", u.getNombre(),
-                        "email", u.getEmail(),
-                        "rol", u.getRol()
-                )))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        var usuarioOpt = usuarioServicio.buscarPorEmail(authentication.getName());
+        if (usuarioOpt.isEmpty()) {
+            System.out.println("[SESSION] Usuario no encontrado: " + authentication.getName());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        var usuario = usuarioOpt.get();
+        if (usuario.getEstado() != null && !usuario.getEstado().equalsIgnoreCase("activo")) {
+            System.out.println("[SESSION] Usuario inactivo/bloqueado: " + usuario.getEmail());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        System.out.println("[SESSION] Usuario autenticado: " + usuario.getEmail());
+        return ResponseEntity.ok(Map.of(
+                "id_usuario", usuario.getIdUsuario(),
+                "nombre", usuario.getNombre(),
+                "email", usuario.getEmail(),
+                "rol", usuario.getRol()
+        ));
     }
 
     @PostMapping("/refresh")
@@ -120,7 +130,7 @@ public class AuthControlador {
         String newToken = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
         return ResponseEntity.ok()
             .header("Set-Cookie", "dv_token=" + newToken + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Lax")
-            .header("Set-Cookie", "dv_refresh=" + refresh + "; HttpOnly; Path=/; Max-Age=" + (7*24*3600) + "; SameSite=Lax")
+            .header("Set-Cookie", "dv_refresh=" + refresh + "; HttpOnly; Path=/; Max-Age=" + (365*24*3600) + "; SameSite=Lax")
             .body(Map.of("exito", true));
     }
 

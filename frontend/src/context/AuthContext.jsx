@@ -4,40 +4,73 @@ import { api, authApi } from '../services/http.js'
 
 export const AuthContext = createContext(null)
 
-
 export function AuthProvider({ children }) {
-    // Nunca usar localStorage/sessionStorage para tokens
   const [user, setUser] = useState(null)
   const [initialized, setInitialized] = useState(false)
 
+  // Función para renovar el token
+  const handleRefresh = async () => {
+    try {
+      const res = await authApi.post('/refresh')
+      return !!res.data?.exito
+    } catch {
+      return false
+    }
+  }
+
   useEffect(() => {
-    (async () => {
-      let ok = false;
+    let cancelled = false
+    const checkSession = async () => {
       try {
         const { data } = await authApi.get('/session')
         if (data?.id_usuario) {
           const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }
-          setUser(u)
-          ok = true;
+          if (!cancelled) setUser(u)
+        } else {
+          if (!cancelled) setUser(null)
         }
       } catch (err) {
         if (err?.response?.status === 401) {
           // Si el token expiró, intenta refrescar
           try {
-            await handleRefresh();
-            // Reintenta obtener la sesión después de refrescar
-            const { data } = await api.get("/auth/session");
-            setUser(data.user);
-          } catch (refreshErr) {
-            setUser(null);
-          }
-        } else {
-          setUser(null)
+            const refreshed = await handleRefresh()
+            if (refreshed) {
+              const { data } = await authApi.get('/session')
+              if (data?.id_usuario) {
+                const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }
+                if (!cancelled) setUser(u)
+                return
+              }
+            }
+          } catch {}
         }
+        if (!cancelled) setUser(null)
+      } finally {
+        if (!cancelled) setInitialized(true)
       }
-      if (!ok) setUser(null)
-      setInitialized(true)
-    })()
+    }
+    checkSession()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    const interceptor = api.interceptors.response.use(
+      response => response,
+      async error => {
+        const originalRequest = error.config
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true
+          const refreshed = await handleRefresh()
+          if (refreshed) {
+            return api(originalRequest)
+          }
+        }
+        return Promise.reject(error)
+      }
+    )
+    return () => {
+      api.interceptors.response.eject(interceptor)
+    }
   }, [])
 
   const login = async (email, password) => {

@@ -32,11 +32,10 @@ public class SecurityConfig {
 			.cors(cors -> {})
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/auth/login", "/auth/register", "/auth/refresh").permitAll()
                                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/productos/**").permitAll()
                                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/contactos/**").permitAll()
                                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categorias/**").permitAll()
-                                // Carrito debe ser accesible para usuarios invitados (usa HttpSession)
                                 .requestMatchers("/api/cart/**").permitAll()
                                 .anyRequest().authenticated()
                         )

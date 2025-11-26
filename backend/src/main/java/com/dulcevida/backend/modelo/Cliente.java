@@ -25,4 +25,9 @@ public class Cliente {
 
     @Email
     private String email;
+    private String rut;
+    private String dv;
+    private String region;
+    private String comuna;
+    private String direccion;
 }

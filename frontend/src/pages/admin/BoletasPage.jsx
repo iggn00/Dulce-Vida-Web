@@ -1,136 +1,171 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/http';
-
-function formatMoney(num) {
-  return num ? num.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }) : '$0';
-}
-
-function formatDate(date) {
-  return new Date(date).toLocaleString('es-CL', { dateStyle: 'medium', timeStyle: 'short' });
-}
-
-function DetalleModal({ open, onClose, boleta }) {
-  const [detalles, setDetalles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (open && boleta) {
-      setLoading(true);
-      api.get(`/boletas/${boleta.idBoleta}/detalles`).then(res => {
-        let arr = Array.isArray(res.data) ? res.data : (res.data?.detalles || res.data?.content || []);
-        setDetalles(arr);
-      }).finally(() => setLoading(false));
-    } else {
-      setDetalles([]);
-    }
-  }, [open, boleta]);
-  if (!open || !boleta) return null;
-  return (
-    <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.3)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{background:'#fff',borderRadius:8,padding:24,minWidth:350,maxWidth:600,boxShadow:'0 2px 16px #0002',position:'relative'}}>
-        <button onClick={onClose} style={{position:'absolute',top:8,right:8,fontSize:18,border:'none',background:'none',cursor:'pointer'}}>✕</button>
-        <h3 style={{marginBottom:8}}>Detalle Boleta #{boleta.numero}</h3>
-        <p><b>Fecha:</b> {formatDate(boleta.fechaEmision)}</p>
-        <p><b>Total:</b> {formatMoney(boleta.total)}</p>
-        {loading ? <p>Cargando productos...</p> : (
-          <table style={{width:'100%',marginTop:12,borderCollapse:'collapse'}}>
-            <thead>
-              <tr style={{background:'#f5f5f5'}}>
-                <th style={{padding:'8px'}}>Foto</th>
-                <th style={{padding:'8px'}}>Producto</th>
-                <th style={{padding:'8px'}}>Cantidad</th>
-                <th style={{padding:'8px'}}>Unitario</th>
-                <th style={{padding:'8px'}}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {detalles.map(d => (
-                <tr key={d.idDetalleBoleta} style={{borderBottom:'1px solid #eee'}}>
-                  <td style={{padding:'8px',textAlign:'center'}}>
-                    {d.imagenUrl ? (
-                      <img src={`/${d.imagenUrl}`} alt={d.nombreProducto || d.idProducto} style={{width:48,height:48,objectFit:'cover',borderRadius:6,boxShadow:'0 1px 4px #0001'}} />
-                    ) : (
-                      <span style={{fontSize:24,opacity:0.3}}>🖼️</span>
-                    )}
-                  </td>
-                  <td style={{padding:'8px'}}><b>{d.nombreProducto || d.idProducto}</b></td>
-                  <td style={{padding:'8px',textAlign:'center'}}>{d.cantidad}</td>
-                  <td style={{padding:'8px',textAlign:'right'}}>{formatMoney(d.precioUnitario)}</td>
-                  <td style={{padding:'8px',textAlign:'right'}}>{formatMoney(d.totalLinea)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        {(!loading && detalles.length === 0) && <p style={{marginTop:16,color:'#888'}}>No hay productos en esta boleta.</p>}
-      </div>
-    </div>
-  );
-}
+// CORRECCIÓN: Importamos las funciones específicas, no 'api'
+import { getAllBoletas, getBoletaDetalles } from '../../services/api';
+import AdminDetalleBoleta from '../../components/admin/AdminDetalleBoleta';
 
 export default function BoletasPage() {
-  const { user, token } = useAuth();
-  const [boletas, setBoletas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [modalBoleta, setModalBoleta] = useState(null);
+    const { user } = useAuth();
+    const [boletas, setBoletas] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function fetchBoletas() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await api.get('/boletas/admin?page=0&size=20');
-        setBoletas(res.data.content || []);
-      } catch (err) {
-        setError('No se pudo cargar boletas');
-      } finally {
-        setLoading(false);
-      }
+    // Estado para el modal de detalle
+    const [selectedBoleta, setSelectedBoleta] = useState(null);
+    const [detallesBoleta, setDetallesBoleta] = useState([]);
+    const [loadingDetalle, setLoadingDetalle] = useState(false);
+
+    useEffect(() => {
+        if (user?.rol === 'ADMINISTRADOR') {
+            cargarBoletas();
+        }
+    }, [user]);
+
+    const cargarBoletas = async () => {
+        setLoading(true);
+        try {
+            // CORRECCIÓN: Usamos la función del servicio que ya devuelve 'data'
+            const data = await getAllBoletas(0, 50);
+            setBoletas(data.content || data || []);
+        } catch (err) {
+            console.error(err);
+            setError('No se pudo cargar el historial de boletas.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const abrirDetalle = async (boleta) => {
+        setLoadingDetalle(true);
+        try {
+            // CORRECCIÓN: Usamos la función del servicio
+            const data = await getBoletaDetalles(boleta.idBoleta);
+
+            // Tu backend devuelve { boleta: {...}, detalles: [...] }
+            setSelectedBoleta(data.boleta);
+            setDetallesBoleta(data.detalles);
+        } catch (err) {
+            alert("Error al cargar los detalles de la boleta.");
+        } finally {
+            setLoadingDetalle(false);
+        }
+    };
+
+    const cerrarModal = () => {
+        setSelectedBoleta(null);
+        setDetallesBoleta([]);
+    };
+
+    if (!user || user.rol !== 'ADMINISTRADOR') {
+        return <div className="container py-5 text-center text-danger"><h3>Acceso Denegado</h3></div>;
     }
-    if (user && user.rol === 'ADMINISTRADOR') fetchBoletas();
-  }, [user, token]);
 
-  if (!user || user.rol !== 'ADMINISTRADOR') {
-    return <div>No tienes permisos para ver esta página.</div>;
-  }
+    return (
+        <div className="container-fluid py-4 bg-light min-vh-100">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 className="fw-bold text-dark mb-1">
+                        <i className="bi bi-receipt-cutoff me-2 text-primary"></i>
+                        Gestión de Boletas
+                    </h2>
+                    <p className="text-muted mb-0">Historial completo de ventas y facturación</p>
+                </div>
+                <button onClick={cargarBoletas} className="btn btn-outline-secondary btn-sm">
+                    <i className="bi bi-arrow-clockwise me-1"></i> Actualizar
+                </button>
+            </div>
 
-  return (
-    <div style={{padding:'2rem'}}>
-      <h2 style={{marginBottom:'1rem'}}>Boletas (Historial Global)</h2>
-      {loading && <p>Cargando...</p>}
-      {error && <p style={{color:'red'}}>{error}</p>}
-      <div style={{overflowX:'auto'}}>
-        <table style={{borderCollapse:'collapse',width:'100%',background:'#fff',boxShadow:'0 2px 8px #0001',borderRadius:8}}>
-          <thead style={{background:'#f5f5f5'}}>
-            <tr>
-              <th style={{padding:'8px 12px'}}>ID</th>
-              <th style={{padding:'8px 12px'}}>Correlativo</th>
-              <th style={{padding:'8px 12px'}}>Fecha</th>
-              <th style={{padding:'8px 12px'}}>Subtotal</th>
-              <th style={{padding:'8px 12px'}}>IVA</th>
-              <th style={{padding:'8px 12px'}}>Total</th>
-              <th style={{padding:'8px 12px'}}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {boletas.map(b => (
-              <tr key={b.idBoleta} style={{borderBottom:'1px solid #eee'}}>
-                <td style={{padding:'8px 12px'}}>{b.idBoleta}</td>
-                <td style={{padding:'8px 12px'}}>{b.numero}</td>
-                <td style={{padding:'8px 12px'}}>{formatDate(b.fechaEmision)}</td>
-                <td style={{padding:'8px 12px'}}>{formatMoney(b.subtotal)}</td>
-                <td style={{padding:'8px 12px'}}>{formatMoney(b.iva)}</td>
-                <td style={{padding:'8px 12px'}}>{formatMoney(b.total)}</td>
-                <td style={{padding:'8px 12px'}}>
-                  <button onClick={() => setModalBoleta(b)} style={{background:'#6c63ff',color:'#fff',border:'none',borderRadius:4,padding:'6px 12px',cursor:'pointer'}}>Ver detalles</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <DetalleModal open={!!modalBoleta} onClose={() => setModalBoleta(null)} boleta={modalBoleta} />
-    </div>
-  );
+            {error && <div className="alert alert-danger shadow-sm border-0">{error}</div>}
+
+            {loading ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Cargando...</span>
+                    </div>
+                    <p className="mt-2 text-muted">Cargando registros...</p>
+                </div>
+            ) : (
+                <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div className="table-responsive">
+                        <table className="table table-hover align-middle mb-0">
+                            <thead className="bg-light text-secondary text-uppercase small">
+                            <tr>
+                                <th className="ps-4 py-3">Folio</th>
+                                <th className="py-3">Fecha Emisión</th>
+                                <th className="py-3">Cliente</th>
+                                <th className="py-3">Ubicación</th>
+                                <th className="text-end py-3">Monto Total</th>
+                                <th className="text-end pe-4 py-3">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody className="border-top-0">
+                            {boletas.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-5 text-muted">
+                                        No se encontraron boletas registradas.
+                                    </td>
+                                </tr>
+                            ) : (
+                                boletas.map((b) => (
+                                    <tr key={b.idBoleta}>
+                                        <td className="ps-4 fw-bold text-dark">#{b.numero}</td>
+                                        <td className="text-muted small">
+                                            <i className="bi bi-calendar3 me-1"></i>
+                                            {new Date(b.fechaEmision).toLocaleDateString()} <br/>
+                                            <span className="text-secondary ms-3">
+                           {new Date(b.fechaEmision).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+                                        </td>
+                                        <td>
+                                            <div className="d-flex flex-column">
+                          <span className="fw-medium text-dark">
+                            {b.pedido?.cliente?.nombre || 'Cliente Web'}
+                          </span>
+                                                <span className="small text-muted">
+                            {b.pedido?.cliente?.email || 'Sin correo'}
+                          </span>
+                                                {b.pedido?.cliente?.rut && (
+                                                    <span className="badge bg-light text-secondary border mt-1" style={{width: 'fit-content'}}>
+                              {b.pedido.cliente.rut}-{b.pedido.cliente.dv}
+                            </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="small text-secondary">
+                                                <div>{b.pedido?.cliente?.region || '-'}</div>
+                                                <div>{b.pedido?.cliente?.comuna || '-'}</div>
+                                            </div>
+                                        </td>
+                                        <td className="text-end fw-bold text-success fs-6">
+                                            ${b.total?.toLocaleString('es-CL')}
+                                        </td>
+                                        <td className="text-end pe-4">
+                                            <button
+                                                className="btn btn-sm btn-outline-primary rounded-pill px-3 hover-shadow"
+                                                onClick={() => abrirDetalle(b)}
+                                                disabled={loadingDetalle}
+                                            >
+                                                <i className="bi bi-eye me-1"></i> Ver Detalle
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Component */}
+            {selectedBoleta && (
+                <AdminDetalleBoleta
+                    boleta={selectedBoleta}
+                    detalles={detallesBoleta}
+                    onClose={cerrarModal}
+                />
+            )}
+        </div>
+    );
 }

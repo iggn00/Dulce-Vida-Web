@@ -6,6 +6,9 @@ USE dulcevidadb;
 
 SET time_zone = '-03:00';
 
+-- -----------------------------------------------------
+-- 1. BORRADO DE TABLAS (Orden correcto por claves foráneas)
+-- -----------------------------------------------------
 DROP TABLE IF EXISTS Detalle_Boleta;
 DROP TABLE IF EXISTS Boleta;
 DROP TABLE IF EXISTS Refresh_Token;
@@ -17,6 +20,10 @@ DROP TABLE IF EXISTS Productos;
 DROP TABLE IF EXISTS Categorias;
 DROP TABLE IF EXISTS Categoria;
 DROP TABLE IF EXISTS Usuario;
+
+-- -----------------------------------------------------
+-- 2. CREACIÓN DE TABLAS
+-- -----------------------------------------------------
 
 CREATE TABLE Usuario (
                          id_usuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,12 +68,17 @@ CREATE TABLE Productos (
                            INDEX idx_categoria (id_categoria)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- TABLA CLIENTES ACTUALIZADA (Con los datos para la boleta)
 CREATE TABLE Clientes (
                           id_cliente INT AUTO_INCREMENT PRIMARY KEY,
                           nombre VARCHAR(100) NOT NULL,
                           email VARCHAR(100) NOT NULL UNIQUE,
                           telefono VARCHAR(20),
-                          direccion VARCHAR(255),
+                          rut VARCHAR(12),        -- Nuevo
+                          dv CHAR(1),             -- Nuevo
+                          region VARCHAR(100),    -- Nuevo
+                          comuna VARCHAR(100),    -- Nuevo
+                          direccion VARCHAR(255), -- Nuevo
                           INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -119,94 +131,6 @@ CREATE TABLE Contactos (
                            INDEX idx_fecha (fecha_envio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO Categorias (nombre, descripcion) VALUES
-                                                 ('Tortas', 'Tortas para toda ocasión'),
-                                                 ('Galletas', 'Galletas artesanales y cookies'),
-                                                 ('Pasteles', 'Pasteles individuales y familiares'),
-                                                 ('Cheesecakes', 'Cheesecakes cremosos y deliciosos'),
-                                                 ('Macarons', 'Macarons franceses de diferentes sabores')
-    ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion);
-
-INSERT INTO Productos (
-    nombre, descripcion, precio, stock, estado, id_categoria, imagen_url, ingredientes
-) VALUES
-      ('Torta Chocolate Clásica',
-       'Bizcocho húmedo de chocolate con relleno y cobertura de ganache de chocolate semiamargo.',
-       13990.00, 8, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Tortas'),
-       'img/prod/tortadech.png',
-       'Harina, cacao, huevos, mantequilla, azúcar, chocolate semiamargo, crema'),
-
-      ('Cheesecake de Frutilla',
-       'Cheesecake cremoso sobre base de galletas, cubierto con salsa y trozos de frutilla.',
-       10990.00, 6, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Cheesecakes'),
-       'img/prod/cheesecakefut.png',
-       'Queso crema, frutillas, galletas, mantequilla, azúcar, crema'),
-
-      ('Brownie de Nuez',
-       'Brownie intenso de chocolate con trozos de nuez, húmedo y fudgy.',
-       3990.00, 24, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
-       'img/prod/brownienuez.png',
-       'Chocolate, mantequilla, huevos, azúcar, harina, nueces'),
-
-      ('Tiramisú Clásico',
-       'Postre italiano con capas de bizcochos remojados en café y crema de mascarpone.',
-       9990.00, 5, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
-       'img/prod/tiramisu.png',
-       'Queso mascarpone, huevos, azúcar, café, bizcochos de soletilla, cacao'),
-
-      ('Pie de Limón',
-       'Pie con base de galleta, relleno cremoso y merengue italiano dorado.',
-       9490.00, 8, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
-       'img/prod/piedelimon.png',
-       'Galletas, mantequilla, leche condensada, jugo de limón, huevos, azúcar'),
-
-      ('Rolls de Canela',
-       'Rolls esponjosos de canela con glaseado de vainilla.',
-       6990.00, 10, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
-       'img/prod/rolldecanela.png',
-       'Harina, levadura, leche, mantequilla, azúcar, canela, vainilla'),
-
-      ('Trenza de Hojaldre con Frutas',
-       'Hojaldre crujiente relleno con crema pastelera y frutas.',
-       7490.00, 8, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
-       'img/prod/hojaldre.png',
-       'Harina, mantequilla, crema pastelera, frutas frescas, azúcar'),
-
-      ('Pastel de Chocolate Individual',
-       'Pastel individual de chocolate con cobertura brillante.',
-       3490.00, 20, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
-       'img/prod/pastelch.png',
-       'Harina, cacao, huevos, mantequilla, azúcar, chocolate'),
-
-      ('Cupcakes Vainilla y Chocolate (6 unidades)',
-       'Caja de 6 cupcakes con frosting cremoso.',
-       5990.00, 18, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
-       'img/prod/cupcakes.png',
-       'Harina, huevos, leche, mantequilla, azúcar, cacao, vainilla'),
-
-      ('Cookies Chips de Chocolate (12 unidades)',
-       'Galletas con muchas chispas de chocolate.',
-       3990.00, 30, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Galletas'),
-       'img/prod/cookies.png',
-       'Harina, mantequilla, azúcar, huevos, chips de chocolate, vainilla'),
-
-      ('Caja Macarons Mix (12 unidades)',
-       'Surtido de macarons de sabores variados.',
-       8990.00, 15, 'disponible',
-       (SELECT id_categoria FROM Categorias WHERE nombre = 'Macarons'),
-       'img/prod/macaronsmix.png',
-       'Claras de huevo, azúcar flor, almendra molida, rellenos saborizados');
-
 CREATE TABLE IF NOT EXISTS Refresh_Token (
                                              id_refresh BIGINT AUTO_INCREMENT PRIMARY KEY,
                                              token VARCHAR(200) NOT NULL UNIQUE,
@@ -241,9 +165,108 @@ CREATE TABLE IF NOT EXISTS Detalle_Boleta (
     INDEX idx_boleta (id_boleta)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- -----------------------------------------------------
+-- 3. INSERCIÓN DE DATOS (SEED)
+-- -----------------------------------------------------
+
+INSERT INTO Categorias (nombre, descripcion) VALUES
+                                                 ('Tortas', 'Tortas para toda ocasión'),
+                                                 ('Galletas', 'Galletas artesanales y cookies'),
+                                                 ('Pasteles', 'Pasteles individuales y familiares'),
+                                                 ('Cheesecakes', 'Cheesecakes cremosos y deliciosos'),
+                                                 ('Macarons', 'Macarons franceses de diferentes sabores')
+    ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion);
+
+-- PRODUCTOS CON RUTAS DE IMAGEN CORREGIDAS (con / al inicio)
+INSERT INTO Productos (
+    nombre, descripcion, precio, stock, estado, id_categoria, imagen_url, ingredientes
+) VALUES
+      ('Torta Chocolate Clásica',
+       'Bizcocho húmedo de chocolate con relleno y cobertura de ganache de chocolate semiamargo.',
+       13990.00, 8, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Tortas'),
+       '/img/prod/tortadech.png',
+       'Harina, cacao, huevos, mantequilla, azúcar, chocolate semiamargo, crema'),
+
+      ('Cheesecake de Frutilla',
+       'Cheesecake cremoso sobre base de galletas, cubierto con salsa y trozos de frutilla.',
+       10990.00, 6, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Cheesecakes'),
+       '/img/prod/cheesecakefut.png',
+       'Queso crema, frutillas, galletas, mantequilla, azúcar, crema'),
+
+      ('Brownie de Nuez',
+       'Brownie intenso de chocolate con trozos de nuez, húmedo y fudgy.',
+       3990.00, 24, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
+       '/img/prod/brownienuez.png',
+       'Chocolate, mantequilla, huevos, azúcar, harina, nueces'),
+
+      ('Tiramisú Clásico',
+       'Postre italiano con capas de bizcochos remojados en café y crema de mascarpone.',
+       9990.00, 5, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
+       '/img/prod/tiramisu.png',
+       'Queso mascarpone, huevos, azúcar, café, bizcochos de soletilla, cacao'),
+
+      ('Pie de Limón',
+       'Pie con base de galleta, relleno cremoso y merengue italiano dorado.',
+       9490.00, 8, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
+       '/img/prod/piedelimon.png',
+       'Galletas, mantequilla, leche condensada, jugo de limón, huevos, azúcar'),
+
+      ('Rolls de Canela',
+       'Rolls esponjosos de canela con glaseado de vainilla.',
+       6990.00, 10, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
+       '/img/prod/rolldecanela.png',
+       'Harina, levadura, leche, mantequilla, azúcar, canela, vainilla'),
+
+      ('Trenza de Hojaldre con Frutas',
+       'Hojaldre crujiente relleno con crema pastelera y frutas.',
+       7490.00, 8, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
+       '/img/prod/hojaldre.png',
+       'Harina, mantequilla, crema pastelera, frutas frescas, azúcar'),
+
+      ('Pastel de Chocolate Individual',
+       'Pastel individual de chocolate con cobertura brillante.',
+       3490.00, 20, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
+       '/img/prod/pastelch.png',
+       'Harina, cacao, huevos, mantequilla, azúcar, chocolate'),
+
+      ('Cupcakes Vainilla y Chocolate (6 unidades)',
+       'Caja de 6 cupcakes con frosting cremoso.',
+       5990.00, 18, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Pasteles'),
+       '/img/prod/cupcakes.png',
+       'Harina, huevos, leche, mantequilla, azúcar, cacao, vainilla'),
+
+      ('Cookies Chips de Chocolate (12 unidades)',
+       'Galletas con muchas chispas de chocolate.',
+       3990.00, 30, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Galletas'),
+       '/img/prod/cookies.png',
+       'Harina, mantequilla, azúcar, huevos, chips de chocolate, vainilla'),
+
+      ('Caja Macarons Mix (12 unidades)',
+       'Surtido de macarons de sabores variados.',
+       8990.00, 15, 'disponible',
+       (SELECT id_categoria FROM Categorias WHERE nombre = 'Macarons'),
+       '/img/prod/macaronsmix.png',
+       'Claras de huevo, azúcar flor, almendra molida, rellenos saborizados');
+
+
+-- -----------------------------------------------------
+-- 4. VERIFICACIÓN
+-- -----------------------------------------------------
+
 SELECT
     (SELECT COUNT(*) FROM Categorias) AS 'Categorías',
     (SELECT COUNT(*) FROM Productos) AS 'Productos',
-    (SELECT COUNT(*) FROM Usuario) AS 'Usuarios';
+    (SELECT COUNT(*) FROM Usuario) AS 'Usuarios',
+    (SELECT COUNT(*) FROM Clientes) AS 'Clientes';
 
-SELECT '✓ Base de datos inicializada correctamente' AS 'ESTADO';
+SELECT '✓ Base de datos actualizada con nuevos campos de cliente' AS 'ESTADO';

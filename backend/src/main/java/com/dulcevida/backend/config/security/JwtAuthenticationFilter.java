@@ -44,10 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         // Permitir acceso sin JWT a /auth/**
+        /*
         if (path.startsWith("/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
+         */
         String token = null;
         if (request.getCookies() != null) {
             for (var c : request.getCookies()) {

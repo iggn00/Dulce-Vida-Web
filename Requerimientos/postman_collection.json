@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "Dulce Vida API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección para autenticación, boletas y carrito. Incluye tests para almacenar `token` y `refreshToken`."
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@dulcevida.cl\",\n  \"password\": \"admin123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  try {",
+              "    var json = pm.response.json();",
+              "    if (json.accessToken) pm.collectionVariables.set('token', json.accessToken);",
+              "    if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);",
+              "    pm.test('Auth tokens almacenados', function () { pm.expect(json.accessToken).to.exist; });",
+              "  } catch (e) { pm.test('Respuesta JSON inválida', function () { throw e; }); }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/refresh",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "refresh"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  try {",
+              "    var json = pm.response.json();",
+              "    if (json.accessToken) pm.collectionVariables.set('token', json.accessToken);",
+              "    pm.test('Nuevo accessToken almacenado', function () { pm.expect(json.accessToken).to.exist; });",
+              "  } catch (e) { pm.test('Respuesta JSON inválida', function () { throw e; }); }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Historial Boletas (Cliente)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/boletas/mias?page=0&size=5",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "boletas", "mias"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "5" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Historial Boletas (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/boletas/admin?page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "boletas", "admin"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Checkout Carrito",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cart/checkout",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cart", "checkout"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "PASTE_JWT_TOKEN" },
+    { "key": "refreshToken", "value": "PASTE_REFRESH_TOKEN" }
+  ]
+}

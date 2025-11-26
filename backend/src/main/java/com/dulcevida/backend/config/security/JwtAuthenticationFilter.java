@@ -27,30 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
-        String method = request.getMethod();
-        // Permitir acceso sin JWT solo a login, register y refresh
-        if (path.equals("/auth/login") || path.equals("/auth/register") || path.equals("/auth/refresh")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        // Permitir acceso sin JWT a los endpoints GET públicos
-        if (method.equalsIgnoreCase("GET") && (
-                path.startsWith("/api/productos") ||
-                path.startsWith("/api/categorias") ||
-                path.startsWith("/api/contactos")
-        )) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        // Permitir acceso sin JWT a /auth/**
-        /*
-        if (path.startsWith("/auth/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-         */
         String token = null;
+
         if (request.getCookies() != null) {
             for (var c : request.getCookies()) {
                 if ("dv_token".equals(c.getName())) {
@@ -59,16 +37,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
+
         String username = null;
         if (token != null && jwtUtil.isTokenValid(token)) {
             username = jwtUtil.extractUsername(token);
         }
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails details = userDetailsService.loadUserByUsername(username);
-            if (jwtUtil.isTokenValid(token)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                UserDetails details = userDetailsService.loadUserByUsername(username);
+
+                if (jwtUtil.isTokenValid(token)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                System.out.println("Advertencia: Token válido pero usuario no encontrado (probablemente borrado de BD).");
             }
         }
         filterChain.doFilter(request, response);

@@ -196,7 +196,6 @@ export default function ProductosPage() {
             setCreateImage(null)
             setShowCreate(true)
           }}>+ Crear producto</button>
-          <button className="btn" type="button" onClick={()=> listRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>Ver productos</button>
         </div>
         <input placeholder="Buscar por nombre" value={q} onChange={(e) => setQ(e.target.value)} />
         <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>

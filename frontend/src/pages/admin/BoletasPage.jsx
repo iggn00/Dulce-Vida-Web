@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-// CORRECCIÓN: Importamos las funciones específicas, no 'api'
 import { getAllBoletas, getBoletaDetalles } from '../../services/api';
 import AdminDetalleBoleta from '../../components/admin/AdminDetalleBoleta';
 
@@ -10,7 +9,6 @@ export default function BoletasPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Estado para el modal de detalle
     const [selectedBoleta, setSelectedBoleta] = useState(null);
     const [detallesBoleta, setDetallesBoleta] = useState([]);
     const [loadingDetalle, setLoadingDetalle] = useState(false);
@@ -24,7 +22,6 @@ export default function BoletasPage() {
     const cargarBoletas = async () => {
         setLoading(true);
         try {
-            // CORRECCIÓN: Usamos la función del servicio que ya devuelve 'data'
             const data = await getAllBoletas(0, 50);
             setBoletas(data.content || data || []);
         } catch (err) {
@@ -38,10 +35,8 @@ export default function BoletasPage() {
     const abrirDetalle = async (boleta) => {
         setLoadingDetalle(true);
         try {
-            // CORRECCIÓN: Usamos la función del servicio
             const data = await getBoletaDetalles(boleta.idBoleta);
 
-            // Tu backend devuelve { boleta: {...}, detalles: [...] }
             setSelectedBoleta(data.boleta);
             setDetallesBoleta(data.detalles);
         } catch (err) {
@@ -158,7 +153,6 @@ export default function BoletasPage() {
                 </div>
             )}
 
-            {/* Modal Component */}
             {selectedBoleta && (
                 <AdminDetalleBoleta
                     boleta={selectedBoleta}

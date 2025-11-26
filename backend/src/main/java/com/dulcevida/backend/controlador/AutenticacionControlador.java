@@ -97,15 +97,15 @@ public class AutenticacionControlador {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        // SOBRESCRIBIR LA COOKIE PARA BORRARLA
+        // Sobrescribimos la cookie con una vacía y tiempo de vida 0
         Cookie cookie = new Cookie("dv_token", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(false); // true en producción con HTTPS
         cookie.setPath("/");
-        cookie.setMaxAge(0); // 0 segundos = borrar inmediatamente
+        cookie.setMaxAge(0); // <--- ESTO MATA LA COOKIE
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(Map.of("exito", true, "mensaje", "Sesión cerrada"));
+        return ResponseEntity.ok(Map.of("mensaje", "Sesión cerrada exitosamente"));
     }
 
     @GetMapping("/session")

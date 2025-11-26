@@ -14,8 +14,7 @@ export default function UsuariosPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Listas derivadas para selects
-  const regiones = useMemo(() => regionesComunas.map(r => r.region), [])
+  const regiones = regionesComunas.map(r => r.region)
   const comunasEdit = useMemo(() => {
     const r = regionesComunas.find(x => x.region === form.region)
     return r ? r.comunas : []
@@ -25,25 +24,14 @@ export default function UsuariosPage() {
     return r ? r.comunas : []
   }, [formCreate.region])
 
-  // Formateo de RUT: 8 dígitos + DV (1-9 o K), inserta guion automáticamente
-  const formatRutInput = (value, prev = '', inputType = '') => {
-    if (!value) return ''
-    let raw = value.toUpperCase().replace(/[^0-9K-]/g, '')
-    let body = ''
-    let dv = ''
-    for (const ch of raw) {
-      if (/\d/.test(ch)) {
-        if (body.length < 8 && dv === '') body += ch
-      } else if (body.length === 8 && dv === '' && /[1-9K]/.test(ch)) {
-        dv = ch
-      }
-    }
-    if (body.length === 0) return ''
-    if (body.length < 8) return body
-    if (dv) return `${body}-${dv}`
-    // Si es borrado, no mostrar guion fantasma
-    if (inputType && inputType.includes('delete')) return body
-    return `${body}-`
+  function formatRut(rut) {
+    const clean = rut.replace(/[^0-9kK]/g, '').toUpperCase()
+    if (clean.length < 2) return clean
+    const num = clean.slice(0, -1)
+    const dv = clean.slice(-1)
+    let formatted = num.replace(/(\d{1,3})(?=(\d{3})+(?!\d))/g, '$1.') + '-' + dv
+    if (rut.length < clean.length) formatted = formatted.replace(/-$/, '')
+    return formatted
   }
 
   const validarUsuario = (f) => {
@@ -142,8 +130,9 @@ export default function UsuariosPage() {
       return
     }
     try {
-      // Parsear RUT
-      const [rut, dv] = formCreate.rutCompleto.toUpperCase().trim().split('-')
+      let rut = formCreate.rutCompleto.replace(/[^0-9kK]/g, '').toUpperCase()
+      let dv = rut.slice(-1)
+      rut = rut.slice(0, -1)
       const payload = {
         nombre: formCreate.nombre,
         email: formCreate.email,
@@ -178,7 +167,9 @@ export default function UsuariosPage() {
       return
     }
     try {
-      const [rut, dv] = form.rutCompleto.toUpperCase().trim().split('-')
+      let rut = form.rutCompleto.replace(/[^0-9kK]/g, '').toUpperCase()
+      let dv = rut.slice(-1)
+      rut = rut.slice(0, -1)
       const payload = { nombre: form.nombre, email: form.email, rol: form.rol, estado: form.estado, rut, dv, region: form.region, comuna: form.comuna }
       if (form.password) payload.password = form.password
       await api.put(`/usuarios/${editId}`, payload)
@@ -300,7 +291,6 @@ export default function UsuariosPage() {
         </form>
       </Modal>
 
-      {/* Modal de creación de usuario */}
       <Modal title="Crear usuario" open={showCreate} onClose={()=> setShowCreate(false)}
         footer={(
           <>

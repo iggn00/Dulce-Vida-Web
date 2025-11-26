@@ -1,8 +1,23 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useRef } from 'react'
 import { login as loginService } from '../services/auth.js'
 import { api, authApi } from '../services/http.js'
 
 export const AuthContext = createContext(null)
+
+// Variables de control para la cola de refresh
+let isRefreshing = false
+let failedQueue = []
+
+function processQueue(error, token = null) {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve(token)
+    }
+  })
+  failedQueue = []
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -31,7 +46,6 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         if (err?.response?.status === 401) {
-          // Si el token expiró, intenta refrescar
           try {
             const refreshed = await handleRefresh()
             if (refreshed) {
@@ -59,10 +73,29 @@ export function AuthProvider({ children }) {
       async error => {
         const originalRequest = error.config
         if (error.response?.status === 401 && !originalRequest._retry) {
+          if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+              failedQueue.push({ resolve, reject })
+            })
+          }
           originalRequest._retry = true
-          const refreshed = await handleRefresh()
-          if (refreshed) {
-            return api(originalRequest)
+          isRefreshing = true
+          try {
+            const refreshed = await handleRefresh()
+            if (refreshed) {
+              processQueue(null)
+              return api(originalRequest)
+            } else {
+              processQueue(error, null)
+              logout()
+              return Promise.reject(error)
+            }
+          } catch (err) {
+            processQueue(err, null)
+            logout()
+            return Promise.reject(err)
+          } finally {
+            isRefreshing = false
           }
         }
         return Promise.reject(error)

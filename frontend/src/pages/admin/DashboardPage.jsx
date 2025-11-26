@@ -9,6 +9,7 @@ export default function DashboardPage() {
   const [productos, setProductos] = useState(0)
   const [bajoStock, setBajoStock] = useState(0)
   const [contactos, setContactos] = useState(0)
+  const [boletas, setBoletas] = useState(0)
   const [loading, setLoading] = useState(true)
   const [ts, setTs] = useState(() => new Date())
 
@@ -16,16 +17,18 @@ export default function DashboardPage() {
     async function cargar() {
       setLoading(true)
       try {
-        const [u, p, bs, c] = await Promise.all([
+        const [u, p, bs, c, b] = await Promise.all([
           api.get('/usuarios').catch(()=>({data:[]})),
           api.get('/productos').catch(()=>({data:[]})),
           api.get('/productos/bajo-stock?umbral=5').catch(()=>({data:[]})),
           api.get('/contactos').catch(()=>({data:[]})),
+          api.get('/boletas/admin?page=0&size=1').catch(()=>({data:{totalElements:0}})),
         ])
         setUsuarios(Array.isArray(u.data)? u.data.length : 0)
         setProductos(Array.isArray(p.data)? p.data.length : 0)
         setBajoStock(Array.isArray(bs.data)? bs.data.length : 0)
         setContactos(Array.isArray(c.data)? c.data.length : 0)
+        setBoletas(b.data?.totalElements || 0)
         setTs(new Date())
       } catch (e) {
         console.error(e)
@@ -52,7 +55,7 @@ export default function DashboardPage() {
             <HeroNavCard to="/admin/productos" variant="azul" icon="🧁" title="Productos" value={productos} />
             <HeroNavCard to="/admin/productos" variant="verde" icon="📦" title="Inventario" subtitle="Bajo stock" value={bajoStock} />
             <HeroNavCard to="/admin/contactos" variant="oro" icon="✉️" title="Contactos" value={contactos} />
-            <HeroNavCard to="/admin/boletas" variant="dorado" icon="🧾" title="Boletas" subtitle="Historial" value={0} />
+            <HeroNavCard to="/admin/boletas" variant="dorado" icon="🧾" title="Boletas" subtitle="Historial" value={boletas} />
         </div>
       )}
       <div className="muted small" style={{marginTop:'.75rem'}}>Última actualización: {ts.toLocaleString()}</div>

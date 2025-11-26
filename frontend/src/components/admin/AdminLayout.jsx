@@ -63,6 +63,10 @@ export default function AdminLayout({ title }) {
             <span className="icon">✉️</span>
             <span className="text">Contactos</span>
           </NavLink>
+          <NavLink to="/admin/boletas" className={({isActive})=>`admin-link ${isActive?'active':''}`} onClick={()=>setOpen(false)}>
+            <span className="icon">🧾</span>
+            <span className="text">Boletas</span>
+          </NavLink>
         </nav>
         <div className="admin-sidebar-footer">
           {user && (

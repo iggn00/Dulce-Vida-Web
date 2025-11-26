@@ -142,9 +142,9 @@ public class AuthControlador {
             refreshOptLogout.ifPresent(refreshTokenServicio::revocarToken);
         }
         return ResponseEntity.ok()
-                .header("Set-Cookie", "dv_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax")
-                .header("Set-Cookie", "dv_refresh=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax")
-                .body(Map.of("exito", true));
+            .header("Set-Cookie", "dv_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax")
+            .header("Set-Cookie", "dv_refresh=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax")
+            .body(Map.of("exito", true));
     }
     }
 

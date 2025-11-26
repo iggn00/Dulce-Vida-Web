@@ -6,6 +6,7 @@ export const AuthContext = createContext(null)
 
 
 export function AuthProvider({ children }) {
+    // Nunca usar localStorage/sessionStorage para tokens
   const [user, setUser] = useState(null)
   const [initialized, setInitialized] = useState(false)
 
@@ -21,26 +22,14 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         if (err?.response?.status === 401) {
-          // Intentar refresh
+          // Si el token expiró, intenta refrescar
           try {
-            const res = await authApi.post('/refresh')
-            if (res.data?.exito) {
-              // Reintentar sesión
-              try {
-                const { data } = await authApi.get('/session')
-                if (data?.id_usuario) {
-                  const u = { id: data.id_usuario, nombre: data.nombre, email: data.email, rol: data.rol }
-                  setUser(u)
-                  ok = true;
-                }
-              } catch {
-                setUser(null)
-              }
-            } else {
-              setUser(null)
-            }
-          } catch {
-            setUser(null)
+            await handleRefresh();
+            // Reintenta obtener la sesión después de refrescar
+            const { data } = await api.get("/auth/session");
+            setUser(data.user);
+          } catch (refreshErr) {
+            setUser(null);
           }
         } else {
           setUser(null)

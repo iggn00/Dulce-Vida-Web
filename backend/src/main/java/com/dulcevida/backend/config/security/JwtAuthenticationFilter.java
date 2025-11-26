@@ -44,7 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         String token = null;
-        // Buscar el token en la cookie dv_token
         if (request.getCookies() != null) {
             for (var c : request.getCookies()) {
                 if ("dv_token".equals(c.getName())) {

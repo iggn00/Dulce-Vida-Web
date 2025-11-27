@@ -70,7 +70,7 @@ spring.datasource.password=TU_CONTRASEÑA
 ```
 - Variables de seguridad recomendadas:
 ```properties
-app.security.jwt.secret=${JWT_SECRET_BASE64}        # secreto en Base64, >=256 bits recomendado
+app.security.jwt.secret=${JWT_SECRET_BASE64}
 app.security.jwt.expiration-ms=3600000
 app.security.bcrypt.strength=11
 ```
@@ -124,7 +124,7 @@ cd backend
 
 ## 🗃️ Scripts SQL y seed
 
-- Scripts y seeds en `db/` y posiblemente en `backend/src/main/resources/db/` (revisar el proyecto para confirmar seed.sql).
+- Scripts y seeds en `db/` y posiblemente en `backend/src/main/resources/db/`.
 - Si `spring.jpa.hibernate.ddl-auto` está activado, Hibernate puede crear/actualizar tablas automáticamente; si prefieres control manual, ejecuta los scripts en `db/`.
 
 ---
@@ -138,15 +138,6 @@ cd backend
 - GET /api/boletas/mias — historial del usuario (paginado)
 - GET /api/boletas/admin — historial global (admin)
 - POST /api/cart/checkout — finaliza pedido y genera boleta (IVA 19%)
-
----
-
-## 👥 Credenciales demo (según backend/README.md)
-
-- Admin: admin@gmail.com / 12345678  
-- Usuario cliente: cliente@gmail.com / 12345678
-
-(Confirma con `backend/src/main/resources/db/seed.sql` si quieres que deje estas credenciales fijas en el README.)
 
 ---
 

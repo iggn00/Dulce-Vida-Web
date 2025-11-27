@@ -1,246 +1,171 @@
-<h1 align="center">🍰 Dulce Vida Web</h1>
-<h3 align="center">Plataforma de Gestión de Repostería — React + Spring Boot</h3>
+# 🍰 Dulce Vida Web
+
+Plataforma FullStack para gestión y venta de repostería.
+
+Frontend: React + Vite | Backend: Spring Boot | Autenticación: JWT
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Frontend-React%2019-61DBFB?style=for-the-badge&logo=react" />
-  <img src="https://img.shields.io/badge/Backend-Spring%20Boot%203-6DB33F?style=for-the-badge&logo=springboot" />
-  <img src="https://img.shields.io/badge/Security-JWT-crimson?style=for-the-badge&logo=jsonwebtokens" />
-  <img src="https://img.shields.io/badge/Database-MySQL%208-4479A1?style=for-the-badge&logo=mysql" />
+  <img src="https://img.shields.io/badge/Frontend-React-61DBFB?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/Backend-Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/Security-JWT-crimson?style=for-the-badge&logo=jsonwebtokens" alt="JWT" />
+  <img src="https://img.shields.io/badge/Database-MySQL-4479A1?style=for-the-badge&logo=mysql" alt="MySQL" />
 </p>
 
-<p align="center">
-  <b>Sistema FullStack para la venta y administración de productos de repostería. Incluye tienda pública, carrito de compras, gestión de usuarios y panel administrativo protegido.</b>
-</p>
+Resumen: Dulce Vida Web es una aplicación fullstack para una pastelería que incluye tienda pública, carrito de compras, gestión de usuarios y un panel administrativo para administrar productos, categorías y boletas/pedidos.
 
 ---
 
-## 🧾 Descripción
+## ✨ Características principales
 
-**Dulce Vida Web** moderniza la experiencia de una pastelería, ofreciendo una interfaz fluida para los clientes y herramientas robustas para los administradores. El proyecto ha evolucionado recientemente para incluir una arquitectura de seguridad más escalable basada en **JWT (JSON Web Tokens)** y un stack de frontend actualizado a **React 19**.
-
-### ✨ Características Principales
-- **Autenticación Segura:** Login y registro protegidos mediante Spring Security y JWT.
-- **Roles de Usuario:** Control de acceso diferenciado para `CLIENTE` y `ADMINISTRADOR`.
-- **Catálogo Interactivo:** Filtrado de productos y detalles con imágenes dinámicas.
-- **Carrito de Compras:** Gestión de pedidos en tiempo real.
-- **Panel Administrativo:** CRUD completo para Productos, Categorías y Usuarios.
-- **Upload de Imágenes:** Almacenamiento local de imágenes de productos.
-- **Testing:** Pruebas unitarias en el frontend con Vitest.
+- Autenticación con JWT (Access + Refresh tokens).
+- Roles: `USUARIO` / `CLIENTE` y `ADMINISTRADOR`.
+- Catálogo de productos con imágenes, filtros y paginación.
+- Carrito de compras y proceso de checkout (generación de boleta con IVA).
+- Panel administrativo con CRUD para Productos, Categorías y Usuarios.
+- Upload de imágenes (almacenamiento local por defecto).
+- Tests: Vitest (frontend) y JUnit (backend).
 
 ---
 
-## ⚙️ Tecnologías
+## 🧭 Estructura del repositorio (actual)
 
-<div align="center">
-
-### 🖥️ Frontend
-`React 19` • `Vite 7` • `Framer Motion` • `Chart.js` • `Vitest` • `Axios`
-
-### ☕ Backend
-`Spring Boot 3` • `Spring Security (JWT)` • `Spring Data JPA` • `Hibernate` • `MySQL`
-
-</div>
+Dulce-Vida-Web/
+- backend/ — Spring Boot (API, seguridad, persistencia)  
+- frontend/ — React + Vite (UI, context, rutas protegidas)  
+- Requerimientos/ — documentación y colecciones (Postman, ERS, testing)  
+- db/ — scripts SQL
+- boletas_api.json — (archivo JSON en la raíz, utilidades/ejemplos)
+- README.md — este archivo
 
 ---
 
-## 🚀 Instalación y Despliegue
+## ⚙️ Tecnologías (recomendadas)
 
-Sigue estos pasos para levantar el proyecto en tu entorno local.
+- Frontend: React, Vite, Axios, Vitest  
+  - Node.js 20.x recomendado
+- Backend: Spring Boot 3.x, Spring Security (JWT), Spring Data JPA, Hibernate, MySQL 8  
+  - Java 21 (JDK) recomendado
+- Herramientas: Maven (mvnw incluido), OpenSSL (generación de secretos)
 
-### 1. Requisitos Previos
-- **Java JDK 17+**
-- **Node.js 18+**
-- **MySQL 8.x**
+---
 
-### 2. Configuración de Base de Datos
-1. Crea una base de datos vacía en MySQL llamada `dulcevidadb`.
-2. (Opcional) Si tienes scripts iniciales en `backend/sql`, ejecútalos. De lo contrario, Hibernate creará las tablas automáticamente (`ddl-auto=update`).
+## 🚀 Instalación y ejecución (local)
 
-### 3. Backend (Spring Boot)
-Navega a la carpeta `backend` y configura `src/main/resources/application.properties` si tus credenciales de MySQL son diferentes:
+Requisitos
+- Java JDK 21+
+- Node.js 20+
+- MySQL 8.x
 
+1) Crear la base de datos:
+```sql
+CREATE DATABASE dulcevidadb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+2) Backend — configuración y ejecución:
+- Edita `backend/src/main/resources/application.properties` o usa variables de entorno:
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/dulcevidadb?serverTimezone=UTC&useSSL=false
 spring.datasource.username=root
 spring.datasource.password=TU_CONTRASEÑA
 ```
-
-Ejecuta el servidor:
-```bash
-cd backend
-# Windows
-./mvnw.cmd spring-boot:run
-# Mac/Linux
-./mvnw spring-boot:run
-```
-El servidor iniciará en `http://localhost:8080`.
-> 📝 **Nota:** La documentación de la API (Swagger) está disponible en `http://localhost:8080/swagger-ui.html`.
-
-#### Variables de Entorno Recomendadas
-Configura un secreto JWT robusto (≥256 bits Base64) y evita usar el valor por defecto:
+- Variables de seguridad recomendadas:
 ```properties
 app.security.jwt.secret=${JWT_SECRET_BASE64}
 app.security.jwt.expiration-ms=3600000
 app.security.bcrypt.strength=11
 ```
-Generar un secreto seguro (Linux/macOS):
+Generar secreto (Linux/macOS):
 ```bash
 openssl rand -base64 48
 ```
+- Ejecutar backend:
+```bash
+cd backend
+# Linux/macOS
+./mvnw spring-boot:run
+# Windows
+.\mvnw.cmd spring-boot:run
+```
+- Servidor por defecto: http://localhost:8080  
+- Swagger UI (si está habilitado): http://localhost:8080/swagger-ui.html
 
-### Script SQL Inicial / Seed
-El archivo `backend/src/main/resources/db/init.sql` crea esquema y datos base. Puedes agregar datos extra en `seed.sql` (nuevo) para usuarios demo adicionales.
-Ejecuta los scripts en orden si trabajas fuera de Hibernate.
-
-### 4. Frontend (React)
-Navega a la carpeta `frontend`, instala las dependencias y ejecuta el servidor de desarrollo:
-
+3) Frontend — instalar y ejecutar:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-La aplicación estará disponible en `http://localhost:5173`.
+- Frontend por defecto: http://localhost:5173
 
 ---
 
-## 🧪 Ejecución de Tests
+## 🧩 Tokens y storage (frontend)
 
-El proyecto cuenta ahora con una suite de pruebas automatizadas utilizando **Vitest** para asegurar la calidad del código en el frontend.
+- Tokens en localStorage (claves usadas por el frontend).
+- Interceptor Axios para inyectar Authorization y manejar refresh tokens mediante `/auth/refresh`.
 
+---
+
+## 🧪 Tests
+
+Frontend (Vitest):
 ```bash
 cd frontend
 npm test
 ```
 
-Backend:
+Backend (JUnit / Maven):
 ```bash
 cd backend
-./mvnw test   # Windows usar mvnw.cmd
-```
-
-Resumen actual de cobertura funcional (frontend): 6 pruebas (AuthContextRefresh, CartContextLogic, LoginPage, ProductCard, ProtectedRoute, HistorialComprasPage).
-Servicios backend clave probados con JUnit: AuthControlador, UsuarioServicio, CarritoServicio, ProductoServicio.
-
----
-
-## 🔐 Seguridad y Autenticación
-
-El sistema ha migrado de sesiones tradicionales a **Stateless JWT Authentication**:
-
-1. **Login:** El usuario envía credenciales a `/auth/login`.
-2. **Token:** El servidor valida y responde con un `Bearer Token`.
-3. **Acceso:** El frontend intercepta las peticiones (vía Axios interceptors) y adjunta el token en el header `Authorization`.
-4. **Protección:** `JwtAuthenticationFilter` en Spring Boot valida el token en cada petición a rutas protegidas (`/api/**`).
-
----
-
-## 📂 Estructura del Proyecto
-
-```text
-Dulce-Vida-Web/
-├── backend/
-│   ├── src/main/java/.../security  # Configuración JWT y Filtros
-│   ├── src/main/java/.../controllers
-│   └── src/main/resources/         # Configuración y estáticos
-├── frontend/
-│   ├── src/
-│   │   ├── context/    # AuthContext (Manejo de estado global)
-│   │   ├── components/ # Componentes reutilizables y ProtectedRoute
-│   │   ├── pages/      # Vistas principales (Login, Tienda, Admin)
-│   │   └── services/   # Lógica de peticiones HTTP
-│   └── package.json    # Dependencias (React 19, Vitest)
+./mvnw test
 ```
 
 ---
 
-## 👥 Autor
+## 🗃️ Scripts SQL y seed
 
-| Desarrollador | Rol | GitHub |
-|--------------|-----|--------|
-| **Ignacio Silva** | FullStack Dev | [@iggn00](https://github.com/iggn00) |
+- Scripts y seeds en `db/` y posiblemente en `backend/src/main/resources/db/`.
+- Si `spring.jpa.hibernate.ddl-auto` está activado, Hibernate puede crear/actualizar tablas automáticamente; si prefieres control manual, ejecuta los scripts en `db/`.
 
 ---
 
-<p align="center">
-  Hecho con ❤️ y mucho ☕
-</p>
+## 🔐 Endpoints clave (resumen)
 
-  ---
-  ## 🔐 Seguridad Extendida
-  JWT Access + Refresh con rotación segura; logout revoca refresh. Rate limiting (5 intentos / 5 min) contra fuerza bruta. Cambio de contraseña verifica hash actual.
+- POST /auth/login — autenticar (devuelve token + refreshToken)
+- POST /auth/refresh — rota refresh token y devuelve nuevo par
+- POST /auth/logout — revoca refresh token
+- POST /api/usuarios/{id}/password — cambiar contraseña
+- GET /api/boletas/mias — historial del usuario (paginado)
+- GET /api/boletas/admin — historial global (admin)
+- POST /api/cart/checkout — finaliza pedido y genera boleta (IVA 19%)
 
-  ### Endpoints Clave
-  `POST /auth/login` (token, refreshToken)
-  `POST /auth/refresh` (rotación)
-  `POST /auth/logout` (revocación refresh)
-  `POST /api/usuarios/{id}/password` (cambio contraseña)
-  `GET /api/boletas/mias` (historial usuario paginado)
-  `GET /api/boletas/admin` (historial global admin)
-    `POST /api/cart/checkout` (pedido + boleta con IVA 19%)
+---
 
-  ### Payload JWT
-  ```json
-  {
-    "sub": "email@dominio.cl",
-    "rol": "ADMINISTRADOR",
-    "iat": 1732400000,
-    "exp": 1732403600
-  }
-  ```
+## 📦 Documentación y utilidades (rutas corregidas)
 
-  ### Flujo Refresh Token
-  1. Login entrega `token` y `refreshToken` (válido 24h).
-  2. Interceptor en frontend intenta `/auth/refresh` tras un 401.
-  3. Refresh rota token anterior (revocado) y entrega par nuevo.
+- Swagger UI: `/swagger-ui.html` (cuando el backend esté corriendo)
+- Postman Collection / documentación: Requerimientos/ `postman_collection.json`
+- ERS : Requerimientos/ `ERS-Ignacio-Silva.pdf`
+- Archivo JSON en la raíz: `boletas_api.json`
+- Scripts SQL: `db/`
+---
 
-  ## 💳 Credenciales Demo
-  Admin: `admin@dulcevida.cl` / `admin123`
-  Usuario: `cliente@demo.cl` (crear con registro si no existe)
+## 🛠️ Contribuir
 
-  ## 📄 Documentación Complementaria
-  - Swagger: `/swagger-ui.html`
-  - Postman Collection: `req/postman_collection.json`
-  - ERS: `req/ERS.md`
-  - Testing: `req/Testing.md`
-  - Seed adicional: `backend/src/main/resources/db/seed.sql`
+1. Haz fork del repositorio.  
+2. Crea una rama descriptiva: `feature/mi-cambio` o `fix/bug`.  
+3. Abre PR con descripción clara y tests si aplica.
 
-  ### Nota sobre Swagger en entorno local
-  En ciertos navegadores/entornos locales se observa un 403 antes de que la aplicación entregue el JSON de OpenAPI (`/v3/api-docs`). Esto no es un error de configuración de Spring o `springdoc-openapi`, sino una restricción local (política de navegador/seguridad del SO). En entornos donde no existe ese bloqueo (otra máquina o despliegue limpio) Swagger UI carga y lista todos los endpoints correctamente. La configuración activa es:
-  - Dependencia: `springdoc-openapi-starter-webmvc-ui`
-  - Clase: `SwaggerConfig` (define esquema bearer y metadatos)
-  - Seguridad: rutas `/v3/api-docs/**` y `/swagger-ui/**` marcadas como `permitAll()` en `SecurityConfig`.
-  Para la entrega se incluyen capturas mostrando la interfaz y la explicación del bloqueo; funcionalidad confirmada.
+---
 
-  ## 🧮 Paginación
-  Endpoints que soportan paginación usan parámetros `?page={numero}&size={tam}` (0-based). Ejemplo:
-  - `GET /api/boletas/mias?page=0&size=5`
-  - `GET /api/boletas/admin?page=1&size=10`
-  - `GET /api/productos?page=0&size=12` (si está habilitado en controlador de productos).
-  Respuesta típica Spring Data:
-  ```json
-  {
-    "content": [ /* elementos */ ],
-    "pageable": { "pageNumber": 0, "pageSize": 5 },
-    "totalPages": 3,
-    "totalElements": 15
-  }
-  ```
+## 📄 Licencia
 
-  ## 🔐 Hashing de Contraseñas
-  Se utiliza `BCryptPasswordEncoder` con fuerza (cost) = 11 configurado por propiedad `app.security.bcrypt.strength`. Cada contraseña se almacena con salt único; la verificación usa `passwordEncoder.matches(raw, hash)` mitigando timing attacks.
+Añade un archivo `LICENSE` si quieres publicar el proyecto con una licencia explícita (p. ej. MIT).
 
-  ## 🧾 Generación de Boleta
-  Al finalizar checkout (`POST /api/cart/checkout`):
-  - Se genera correlativo incremental.
-  - Se calcula subtotal sumando líneas.
-  - IVA fijo 19% (`iva = subtotal * 0.19`).
-  - Total = subtotal + iva.
-  - Se persiste Boleta y Detalles y queda disponible en `/api/boletas/mias`.
+---
 
-  ## 🛡️ Protección de Rutas (Frontend)
-  El componente `ProtectedRoute` valida presencia de token y, opcionalmente, rol. Redirige a `/login` si no autenticado y a `/` si el rol no es suficiente.
+## ✉️ Autor
 
-  ## 🧪 Interceptores Axios
-  Archivo `src/services/http.js` gestiona inyección de Authorization y rotación automática de tokens ante 401 (refresh). Tokens se guardan en `localStorage` (`dv.auth.token`, `dv.auth.refresh`).
+Ignacio Silva — FullStack Dev — https://github.com/iggn00
 
+Hecho con ❤️ y mucho ☕

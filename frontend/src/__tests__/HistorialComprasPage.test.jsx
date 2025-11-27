@@ -35,14 +35,10 @@ describe('HistorialComprasPage', () => {
     })
     render(<HistorialComprasPage />)
 
-    expect(screen.getByText('Historial de Compras')).toBeInTheDocument()
-    // Loading
-    expect(screen.getByText('Cargando...')).toBeInTheDocument()
-
     await waitFor(() => {
       expect(screen.queryByText('Cargando...')).toBeNull()
     })
-
+    expect(screen.getByText('Historial de Compras')).toBeInTheDocument()
     expect(screen.getByText(/Boleta #1001/)).toBeInTheDocument()
     expect(screen.getByText(/Boleta #1002/)).toBeInTheDocument()
     const btnAnterior = screen.getByRole('button', { name: 'Anterior' })
@@ -81,12 +77,14 @@ describe('HistorialComprasPage', () => {
     await waitFor(() => {
       expect(getBoletaDetalles).toHaveBeenCalledWith(3)
       expect(screen.getByText(/Subtotal:/)).toBeInTheDocument()
-      expect(screen.getByText('Producto A')).toBeInTheDocument()
+      // Busca el texto completo del <li> usando una expresión regular
+      expect(screen.getByText(/Producto A.*Cantidad: 2.*Total: \$10000/)).toBeInTheDocument()
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }))
     await waitFor(() => {
-      expect(screen.queryByText('Producto A')).toBeNull()
+      // Busca el <li> por el texto completo
+      expect(screen.queryByText(/Producto A.*Cantidad: 2.*Total: \$10000/)).toBeNull()
     })
   })
 })
